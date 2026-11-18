@@ -6,6 +6,8 @@ export const USUARIO_KEY = 'usuario'
 const API_BASE_URL =
   import.meta.env?.VITE_API_URL || 'http://localhost:5123/api'
 
+export const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '')
+
 export function limparSessao() {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USUARIO_KEY)
@@ -24,11 +26,10 @@ export function mensagemDeErro(
  * A URL pode ser sobrescrita por `VITE_API_URL`. O padrão assume o perfil
  * `http` da API em `http://localhost:5123`.
  */
+// Sem Content-Type global: o axios define application/json para corpos de
+// objeto e deixa o browser gerar o boundary quando o corpo é FormData.
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
 
 api.interceptors.request.use((config) => {

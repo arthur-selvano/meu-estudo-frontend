@@ -75,9 +75,21 @@ export function AuthProvider({ children }) {
     setSessao({ token: null, usuario: null })
   }, [])
 
+  const atualizarUsuario = useCallback((dadosParciais) => {
+    setSessao((atual) => {
+      if (!atual.usuario) return atual
+
+      const usuarioAtualizado = { ...atual.usuario, ...dadosParciais }
+
+      localStorage.setItem(USUARIO_KEY, JSON.stringify(usuarioAtualizado))
+
+      return { ...atual, usuario: usuarioAtualizado }
+    })
+  }, [])
+
   const value = useMemo(
-    () => ({ usuario, token, login, registrar, logout }),
-    [usuario, token, login, registrar, logout],
+    () => ({ usuario, token, login, registrar, logout, atualizarUsuario }),
+    [usuario, token, login, registrar, logout, atualizarUsuario],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

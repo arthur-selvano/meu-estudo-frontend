@@ -17,6 +17,7 @@ export default function DetalheGrupo({
   onConvidar,
   onAdicionarTopico,
   onAlternarTopico,
+  onVerPerfil,
 }) {
   const [email, setEmail] = useState('')
   const [titulo, setTitulo] = useState('')
@@ -75,9 +76,18 @@ export default function DetalheGrupo({
 
         <p className="mt-3 text-sm text-[#53655C]">
           Dono:{' '}
-          <span className="font-medium text-[#12251D]">
-            {souDono ? 'você' : grupo.donoNome}
-          </span>
+          {souDono ? (
+            <span className="font-medium text-[#12251D]">você</span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onVerPerfil(grupo.donoId)}
+              aria-label={`Ver perfil de ${grupo.donoNome}`}
+              className="rounded-sm font-medium text-[#12251D] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6F4E]/40"
+            >
+              {grupo.donoNome}
+            </button>
+          )}
         </p>
 
         <div className="mt-5 border-t border-[#E1E8DE] pt-4">
@@ -97,7 +107,14 @@ export default function DetalheGrupo({
                   key={membro.usuarioId}
                   className="flex items-center gap-2 rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] px-3 py-1.5"
                 >
-                  <span className="text-sm text-[#33473C]">{membro.nome}</span>
+                  <button
+                    type="button"
+                    onClick={() => onVerPerfil(membro.usuarioId)}
+                    aria-label={`Ver perfil de ${membro.nome}`}
+                    className="rounded-sm text-sm text-[#33473C] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6F4E]/40"
+                  >
+                    {membro.nome}
+                  </button>
                   <StatusBadge status={membro.status} />
                 </li>
               ))}

@@ -7,6 +7,8 @@ import ListaGrupos from '../components/ListaGrupos'
 import FormNovoGrupo from '../components/FormNovoGrupo'
 import DetalheGrupo from '../components/DetalheGrupo'
 import FeedbackBanner from '../components/FeedbackBanner'
+import PerfilEdicaoModal from '../components/PerfilEdicaoModal'
+import PerfilPublicoModal from '../components/PerfilPublicoModal'
 import { mensagemDeErro } from '../services/api'
 import { BOTAO_PRIMARIO } from '../styles/ui'
 import {
@@ -28,11 +30,13 @@ function idSelecionadoValido(grupos, atual) {
 }
 
 export default function Dashboard() {
-  const { usuario, logout } = useAuth()
+  const { usuario, logout, atualizarUsuario } = useAuth()
   const [grupos, setGrupos] = useState([])
   const [convites, setConvites] = useState([])
   const [grupoSelecionadoId, setGrupoSelecionadoId] = useState(null)
   const [formularioAberto, setFormularioAberto] = useState(false)
+  const [perfilEdicaoAberto, setPerfilEdicaoAberto] = useState(false)
+  const [perfilPublicoId, setPerfilPublicoId] = useState(null)
   const [carregandoInicial, setCarregandoInicial] = useState(true)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
@@ -154,6 +158,12 @@ export default function Dashboard() {
     })
   }
 
+  function handlePerfilSalvo(perfil) {
+    atualizarUsuario({ nome: perfil.nome, fotoUrl: perfil.fotoUrl })
+    setPerfilEdicaoAberto(false)
+    setSucesso('Perfil atualizado com sucesso.')
+  }
+
   function handleAlternarTopico(topicoId) {
     if (!grupoSelecionado) return Promise.resolve(false)
 
@@ -181,7 +191,11 @@ export default function Dashboard() {
   if (carregandoInicial) {
     return (
       <div className="min-h-screen bg-[#F4F6F0] text-[#12251D]">
-        <DashboardHeader nome={usuario.nome} onSair={logout} />
+        <DashboardHeader
+          usuario={usuario}
+          onSair={logout}
+          onAbrirPerfil={() => setPerfilEdicaoAberto(true)}
+        />
         <div className="flex min-h-72 items-center justify-center px-4">
           <Loader2
             aria-hidden="true"
@@ -196,7 +210,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#F4F6F0] text-[#12251D]">
-      <DashboardHeader nome={usuario.nome} onSair={logout} />
+      <DashboardHeader
+        usuario={usuario}
+        onSair={logout}
+        onAbrirPerfil={() => setPerfilEdicaoAberto(true)}
+      />
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <FeedbackBanner
@@ -244,6 +262,7 @@ export default function Dashboard() {
                 onConvidar={handleConvidar}
                 onAdicionarTopico={handleAdicionarTopico}
                 onAlternarTopico={handleAlternarTopico}
+                onVerPerfil={setPerfilPublicoId}
               />
             ) : (
               <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-[#CBD6C8] bg-white/60 p-8 text-center">
@@ -266,6 +285,20 @@ export default function Dashboard() {
           </main>
         </div>
       </div>
+
+      {perfilEdicaoAberto && (
+        <PerfilEdicaoModal
+          onFechar={() => setPerfilEdicaoAberto(false)}
+          onSalvo={handlePerfilSalvo}
+        />
+      )}
+
+      {perfilPublicoId && (
+        <PerfilPublicoModal
+          usuarioId={perfilPublicoId}
+          onFechar={() => setPerfilPublicoId(null)}
+        />
+      )}
     </div>
   )
 }
