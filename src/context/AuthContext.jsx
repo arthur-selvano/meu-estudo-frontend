@@ -9,21 +9,13 @@ import {
   login as loginRequest,
   registrar as registrarRequest,
 } from '../services/authService'
-import { TOKEN_KEY, USUARIO_KEY } from '../services/api'
+import { TOKEN_KEY, USUARIO_KEY, limparSessao } from '../services/api'
 
 const AuthContext = createContext(null)
 
-function limparStorage() {
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(USUARIO_KEY)
-}
-
 function sessaoValida(usuario) {
   return (
-    usuario !== null &&
-    typeof usuario === 'object' &&
-    !Array.isArray(usuario) &&
-    typeof usuario.nome === 'string' &&
+    typeof usuario?.nome === 'string' &&
     usuario.nome.trim() !== '' &&
     typeof usuario.email === 'string' &&
     usuario.email.trim() !== ''
@@ -35,7 +27,7 @@ function lerSessaoInicial() {
   const usuarioJson = localStorage.getItem(USUARIO_KEY)
 
   if (!token || !usuarioJson) {
-    limparStorage()
+    limparSessao()
     return { token: null, usuario: null }
   }
 
@@ -48,7 +40,7 @@ function lerSessaoInicial() {
 
     return { token, usuario }
   } catch {
-    limparStorage()
+    limparSessao()
     return { token: null, usuario: null }
   }
 }
@@ -79,7 +71,7 @@ export function AuthProvider({ children }) {
   )
 
   const logout = useCallback(() => {
-    limparStorage()
+    limparSessao()
     setSessao({ token: null, usuario: null })
   }, [])
 

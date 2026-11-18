@@ -1,4 +1,5 @@
 import { GraduationCap, LogOut } from 'lucide-react'
+import { BOTAO_SECUNDARIO } from '../styles/ui'
 
 export default function DashboardHeader({ nome, onSair }) {
   return (
@@ -18,7 +19,7 @@ export default function DashboardHeader({ nome, onSair }) {
           <button
             type="button"
             onClick={onSair}
-            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-[#CBD6C8] px-3 py-2 text-sm font-medium text-[#173D2E] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25"
+            className={`${BOTAO_SECUNDARIO} shrink-0 px-3 py-2 text-sm`}
           >
             <LogOut aria-hidden="true" size={15} />
             Sair

@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react'
-import {
-  AlertCircle,
-  CheckCircle2,
-  Loader2,
-  Users,
-  X,
-} from 'lucide-react'
+import { Loader2, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import DashboardHeader from '../components/DashboardHeader'
 import ConvitesPendentes from '../components/ConvitesPendentes'
 import ListaGrupos from '../components/ListaGrupos'
 import FormNovoGrupo from '../components/FormNovoGrupo'
 import DetalheGrupo from '../components/DetalheGrupo'
+import FeedbackBanner from '../components/FeedbackBanner'
+import { mensagemDeErro } from '../services/api'
+import { BOTAO_PRIMARIO } from '../styles/ui'
 import {
   adicionarTopico,
   alternarConclusaoTopico,
@@ -21,12 +18,6 @@ import {
   listarMeusGrupos,
   responderConvite,
 } from '../services/grupoService'
-
-const MENSAGEM_PADRAO = 'Não foi possível concluir a ação. Tente novamente.'
-
-function mensagemDeErro(err) {
-  return err.response?.data?.erro || MENSAGEM_PADRAO
-}
 
 function idSelecionadoValido(grupos, atual) {
   if (atual && grupos.some((grupo) => grupo.id === atual)) {
@@ -50,6 +41,23 @@ export default function Dashboard() {
   const grupoSelecionado =
     grupos.find((grupo) => grupo.id === grupoSelecionadoId) ?? null
 
+  function aplicarDados(gruposCarregados, convitesCarregados, preferidoId) {
+    setGrupos(gruposCarregados)
+    setConvites(convitesCarregados)
+    setGrupoSelecionadoId((atual) =>
+      idSelecionadoValido(gruposCarregados, preferidoId ?? atual),
+    )
+  }
+
+  async function recarregarDados(preferidoId) {
+    const [gruposCarregados, convitesCarregados] = await Promise.all([
+      listarMeusGrupos(),
+      listarConvitesPendentes(),
+    ])
+
+    aplicarDados(gruposCarregados, convitesCarregados, preferidoId)
+  }
+
   useEffect(() => {
     let ativo = true
 
@@ -62,11 +70,7 @@ export default function Dashboard() {
 
         if (!ativo) return
 
-        setGrupos(gruposCarregados)
-        setConvites(convitesCarregados)
-        setGrupoSelecionadoId((atual) =>
-          idSelecionadoValido(gruposCarregados, atual),
-        )
+        aplicarDados(gruposCarregados, convitesCarregados)
       } catch (err) {
         if (ativo) setErro(mensagemDeErro(err))
       } finally {
@@ -81,89 +85,63 @@ export default function Dashboard() {
     }
   }, [])
 
-  async function handleCriarGrupo(dados) {
+  async function executarAcao(nome, tarefa) {
     setErro('')
     setSucesso('')
-    setAcao('criar')
+    setAcao(nome)
 
     try {
+      return await tarefa()
+    } catch (err) {
+      setErro(mensagemDeErro(err))
+      return false
+    } finally {
+      setAcao('')
+    }
+  }
+
+  function handleCriarGrupo(dados) {
+    return executarAcao('criar', async () => {
       const novoGrupo = await criarGrupo(dados)
+
       setGrupos((atuais) => [...atuais, novoGrupo])
       setGrupoSelecionadoId(novoGrupo.id)
       setFormularioAberto(false)
       setSucesso('Grupo criado com sucesso.')
       return true
-    } catch (err) {
-      setErro(mensagemDeErro(err))
-      return false
-    } finally {
-      setAcao('')
-    }
+    })
   }
 
-  async function handleConvidar(email) {
-    if (!grupoSelecionado) return false
+  function handleConvidar(email) {
+    if (!grupoSelecionado) return Promise.resolve(false)
 
     const grupoId = grupoSelecionado.id
-    setErro('')
-    setSucesso('')
-    setAcao('convite')
 
-    try {
+    return executarAcao('convite', async () => {
       await convidarMembro(grupoId, email)
-      const gruposAtualizados = await listarMeusGrupos()
-      setGrupos(gruposAtualizados)
-      setGrupoSelecionadoId((atual) =>
-        idSelecionadoValido(gruposAtualizados, atual),
-      )
+      await recarregarDados()
       setSucesso(`Convite enviado para ${email}.`)
       return true
-    } catch (err) {
-      setErro(mensagemDeErro(err))
-      return false
-    } finally {
-      setAcao('')
-    }
+    })
   }
 
-  async function handleResponderConvite(grupoId, aceitar) {
-    setErro('')
-    setSucesso('')
-    setAcao('responder')
-
-    try {
+  function handleResponderConvite(grupoId, aceitar) {
+    return executarAcao('responder', async () => {
       await responderConvite(grupoId, aceitar)
-
-      const [gruposAtualizados, convitesAtualizados] = await Promise.all([
-        listarMeusGrupos(),
-        listarConvitesPendentes(),
-      ])
-
-      setGrupos(gruposAtualizados)
-      setConvites(convitesAtualizados)
-      setGrupoSelecionadoId((atual) =>
-        idSelecionadoValido(gruposAtualizados, aceitar ? grupoId : atual),
-      )
+      await recarregarDados(aceitar ? grupoId : undefined)
       setSucesso(aceitar ? 'Convite aceito.' : 'Convite recusado.')
       return true
-    } catch (err) {
-      setErro(mensagemDeErro(err))
-      return false
-    } finally {
-      setAcao('')
-    }
+    })
   }
 
-  async function handleAdicionarTopico(dados) {
-    if (!grupoSelecionado) return false
+  function handleAdicionarTopico(dados) {
+    if (!grupoSelecionado) return Promise.resolve(false)
 
     const grupoId = grupoSelecionado.id
-    setErro('')
-    setSucesso('')
-    setAcao('topico')
 
-    try {
+    return executarAcao('topico', async () => {
       const novoTopico = await adicionarTopico(grupoId, dados)
+
       setGrupos((atuais) =>
         atuais.map((grupo) =>
           grupo.id === grupoId
@@ -173,24 +151,17 @@ export default function Dashboard() {
       )
       setSucesso('Tópico adicionado.')
       return true
-    } catch (err) {
-      setErro(mensagemDeErro(err))
-      return false
-    } finally {
-      setAcao('')
-    }
+    })
   }
 
-  async function handleAlternarTopico(topicoId) {
-    if (!grupoSelecionado) return false
+  function handleAlternarTopico(topicoId) {
+    if (!grupoSelecionado) return Promise.resolve(false)
 
     const grupoId = grupoSelecionado.id
-    setErro('')
-    setSucesso('')
-    setAcao('toggle')
 
-    try {
+    return executarAcao('toggle', async () => {
       const topicoAtualizado = await alternarConclusaoTopico(grupoId, topicoId)
+
       setGrupos((atuais) =>
         atuais.map((grupo) =>
           grupo.id === grupoId
@@ -204,12 +175,7 @@ export default function Dashboard() {
         ),
       )
       return true
-    } catch (err) {
-      setErro(mensagemDeErro(err))
-      return false
-    } finally {
-      setAcao('')
-    }
+    })
   }
 
   if (carregandoInicial) {
@@ -233,49 +199,18 @@ export default function Dashboard() {
       <DashboardHeader nome={usuario.nome} onSair={logout} />
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-        {erro && (
-          <div
-            role="alert"
-            className="mb-4 flex items-start gap-2.5 rounded-lg border border-[#E3C4B5] bg-[#FBEDE7] px-3.5 py-3 text-sm text-[#8A3B1E]"
-          >
-            <AlertCircle
-              aria-hidden="true"
-              size={18}
-              className="mt-0.5 shrink-0"
-            />
-            <p className="flex-1 leading-snug">{erro}</p>
-            <button
-              type="button"
-              onClick={() => setErro('')}
-              aria-label="Fechar mensagem de erro"
-              className="rounded p-0.5 hover:bg-[#F3D9CE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A3B1E]/30"
-            >
-              <X aria-hidden="true" size={16} />
-            </button>
-          </div>
-        )}
-
-        {sucesso && (
-          <div
-            role="status"
-            className="mb-4 flex items-start gap-2.5 rounded-lg border border-[#B7D2B4] bg-[#E3EFE0] px-3.5 py-3 text-sm text-[#245B34]"
-          >
-            <CheckCircle2
-              aria-hidden="true"
-              size={18}
-              className="mt-0.5 shrink-0"
-            />
-            <p className="flex-1 leading-snug">{sucesso}</p>
-            <button
-              type="button"
-              onClick={() => setSucesso('')}
-              aria-label="Fechar mensagem de sucesso"
-              className="rounded p-0.5 hover:bg-[#D2E4CE] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#245B34]/30"
-            >
-              <X aria-hidden="true" size={16} />
-            </button>
-          </div>
-        )}
+        <FeedbackBanner
+          tipo="erro"
+          mensagem={erro}
+          onFechar={() => setErro('')}
+          className="mb-4"
+        />
+        <FeedbackBanner
+          tipo="sucesso"
+          mensagem={sucesso}
+          onFechar={() => setSucesso('')}
+          className="mb-4"
+        />
 
         <div className="grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
           <aside className="space-y-4">
@@ -312,11 +247,7 @@ export default function Dashboard() {
               />
             ) : (
               <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-[#CBD6C8] bg-white/60 p-8 text-center">
-                <Users
-                  aria-hidden="true"
-                  size={26}
-                  className="text-[#8A9A8F]"
-                />
+                <Users aria-hidden="true" size={26} className="text-[#8A9A8F]" />
                 <p className="mt-3 font-serif text-xl">Selecione um grupo</p>
                 <p className="mt-1 max-w-xs text-sm text-[#6B7D71]">
                   Escolha um grupo na lista ou crie o primeiro para começar.
@@ -325,7 +256,7 @@ export default function Dashboard() {
                   <button
                     type="button"
                     onClick={() => setFormularioAberto(true)}
-                    className="mt-4 rounded-lg bg-[#173D2E] px-4 py-2.5 text-sm font-semibold text-[#F4F6F0] transition-colors hover:bg-[#1F4D3A] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25"
+                    className={`${BOTAO_PRIMARIO} mt-4 px-4 py-2.5 text-sm`}
                   >
                     Criar grupo
                   </button>

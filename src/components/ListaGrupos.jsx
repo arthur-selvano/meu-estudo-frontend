@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react'
+import { BOTAO_SECUNDARIO, CARTAO } from '../styles/ui'
 
 export default function ListaGrupos({
   grupos,
@@ -8,13 +9,13 @@ export default function ListaGrupos({
   onAlternarFormulario,
 }) {
   return (
-    <section className="rounded-xl border border-[#CBD6C8] bg-white p-4 shadow-sm">
+    <section className={`${CARTAO} p-4`}>
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-serif text-lg">Meus grupos</h2>
         <button
           type="button"
           onClick={onAlternarFormulario}
-          className="flex items-center gap-1 rounded-lg border border-[#CBD6C8] px-2.5 py-1.5 text-xs font-semibold text-[#173D2E] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/20"
+          className={`${BOTAO_SECUNDARIO} px-2.5 py-1.5 text-xs`}
         >
           <Plus aria-hidden="true" size={14} />
           {formularioAberto ? 'Fechar' : 'Novo'}

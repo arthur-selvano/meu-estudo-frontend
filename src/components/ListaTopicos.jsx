@@ -1,10 +1,5 @@
 import { CalendarDays, Check } from 'lucide-react'
-
-function formatarData(valor) {
-  if (!valor) return ''
-
-  return new Intl.DateTimeFormat('pt-BR').format(new Date(`${valor}T00:00:00`))
-}
+import { formatarDataSimples } from '../utils/datas'
 
 export default function ListaTopicos({ topicos, alternando, onAlternar }) {
   if (topicos.length === 0) {
@@ -58,7 +53,7 @@ export default function ListaTopicos({ topicos, alternando, onAlternar }) {
               {topico.dataPrevista && (
                 <span className="mt-1 flex items-center gap-1 text-xs text-[#6B7D71]">
                   <CalendarDays aria-hidden="true" size={12} />
-                  {formatarData(topico.dataPrevista)}
+                  {formatarDataSimples(topico.dataPrevista)}
                 </span>
               )}
             </span>

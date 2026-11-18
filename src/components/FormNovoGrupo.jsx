@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
-
-const CAMPO =
-  'w-full rounded-lg border border-[#CBD6C8] bg-white px-3 py-2.5 text-sm text-[#12251D] placeholder:text-[#9AA79D] outline-none transition-colors focus:border-[#2F6F4E] focus:ring-[3px] focus:ring-[#2F6F4E]/15 disabled:cursor-not-allowed disabled:bg-[#F0F2EC]'
-const ROTULO = 'mb-1 block text-xs font-medium text-[#33473C]'
+import { BOTAO_PRIMARIO, CAMPO, CARTAO, ROTULO } from '../styles/ui'
 
 export default function FormNovoGrupo({ aberto, criando, onCriar }) {
   const [titulo, setTitulo] = useState('')
@@ -23,10 +20,7 @@ export default function FormNovoGrupo({ aberto, criando, onCriar }) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-xl border border-[#CBD6C8] bg-white p-4 shadow-sm"
-    >
+    <form onSubmit={handleSubmit} className={`${CARTAO} p-4`}>
       <h2 className="font-serif text-lg">Novo grupo</h2>
 
       <div className="mt-3 space-y-3">
@@ -67,10 +61,14 @@ export default function FormNovoGrupo({ aberto, criando, onCriar }) {
         <button
           type="submit"
           disabled={criando}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#173D2E] px-3 py-2.5 text-sm font-semibold text-[#F4F6F0] transition-colors hover:bg-[#1F4D3A] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 disabled:cursor-not-allowed disabled:opacity-60"
+          className={`${BOTAO_PRIMARIO} w-full px-3 py-2.5 text-sm`}
         >
           {criando && (
-            <Loader2 aria-hidden="true" size={16} className="motion-safe:animate-spin" />
+            <Loader2
+              aria-hidden="true"
+              size={16}
+              className="motion-safe:animate-spin"
+            />
           )}
           {criando ? 'Criando...' : 'Criar grupo'}
         </button>

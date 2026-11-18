@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { Loader2, Mail, Plus, Users } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 import ListaTopicos from './ListaTopicos'
-
-const CAMPO =
-  'w-full rounded-lg border border-[#CBD6C8] bg-white px-3 py-2.5 text-sm text-[#12251D] placeholder:text-[#9AA79D] outline-none transition-colors focus:border-[#2F6F4E] focus:ring-[3px] focus:ring-[#2F6F4E]/15 disabled:cursor-not-allowed disabled:bg-[#F0F2EC]'
-const ROTULO = 'mb-1 block text-xs font-medium text-[#33473C]'
+import {
+  BOTAO_PRIMARIO,
+  CAMPO,
+  CAMPO_ICONE,
+  CARTAO,
+  ROTULO,
+} from '../styles/ui'
 
 export default function DetalheGrupo({
   grupo,
@@ -59,7 +62,7 @@ export default function DetalheGrupo({
 
   return (
     <div className="space-y-5">
-      <section className="rounded-xl border border-[#CBD6C8] bg-white p-5 shadow-sm sm:p-6">
+      <section className={`${CARTAO} p-5 sm:p-6`}>
         <h2 className="font-serif text-3xl leading-tight tracking-tight text-[#12251D]">
           {grupo.titulo}
         </h2>
@@ -104,7 +107,7 @@ export default function DetalheGrupo({
       </section>
 
       {souDono && (
-        <section className="rounded-xl border border-[#CBD6C8] bg-white p-5 shadow-sm">
+        <section className={`${CARTAO} p-5`}>
           <h3 className="font-serif text-xl">Convidar membro</h3>
           <p className="mt-1 text-xs text-[#6B7D71]">
             A pessoa precisa já ter uma conta no MeuEstudos.
@@ -132,14 +135,14 @@ export default function DetalheGrupo({
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="email@exemplo.com"
-                className={`${CAMPO} pl-9`}
+                className={CAMPO_ICONE}
               />
             </div>
 
             <button
               type="submit"
               disabled={convidando || !email.trim()}
-              className="flex items-center justify-center gap-2 rounded-lg bg-[#173D2E] px-4 py-2.5 text-sm font-semibold text-[#F4F6F0] transition-colors hover:bg-[#1F4D3A] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 disabled:cursor-not-allowed disabled:opacity-60"
+              className={`${BOTAO_PRIMARIO} px-4 py-2.5 text-sm`}
             >
               {convidando && (
                 <Loader2
@@ -154,7 +157,7 @@ export default function DetalheGrupo({
         </section>
       )}
 
-      <section className="rounded-xl border border-[#CBD6C8] bg-white p-5 shadow-sm">
+      <section className={`${CARTAO} p-5`}>
         <h3 className="font-serif text-xl">Rotina de estudos</h3>
 
         <form onSubmit={handleAdicionarTopico} className="mt-3 space-y-3">
@@ -211,7 +214,7 @@ export default function DetalheGrupo({
             <button
               type="submit"
               disabled={criandoTopico || !titulo.trim()}
-              className="flex items-center justify-center gap-2 rounded-lg bg-[#173D2E] px-4 py-2.5 text-sm font-semibold text-[#F4F6F0] transition-colors hover:bg-[#1F4D3A] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 disabled:cursor-not-allowed disabled:opacity-60"
+              className={`${BOTAO_PRIMARIO} px-4 py-2.5 text-sm`}
             >
               {criandoTopico ? (
                 <Loader2

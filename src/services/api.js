@@ -3,15 +3,29 @@ import axios from 'axios'
 export const TOKEN_KEY = 'token'
 export const USUARIO_KEY = 'usuario'
 
+const API_BASE_URL =
+  import.meta.env?.VITE_API_URL || 'http://localhost:5123/api'
+
+export function limparSessao() {
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(USUARIO_KEY)
+}
+
+export function mensagemDeErro(
+  err,
+  fallback = 'Não foi possível concluir a ação. Tente novamente.',
+) {
+  return err?.response?.data?.erro || fallback
+}
+
 /**
  * Instância única de comunicação com a API MeuEstudos.
  *
- * Observação: a API chama `UseHttpsRedirection()`. Rodando pelo perfil `http`
- * (porta 5123) o endereço abaixo funciona; pelo perfil `https`, troque a
- * baseURL para `https://localhost:7120/api`.
+ * A URL pode ser sobrescrita por `VITE_API_URL`. O padrão assume o perfil
+ * `http` da API em `http://localhost:5123`.
  */
 export const api = axios.create({
-  baseURL: 'http://localhost:5123/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -31,8 +45,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(USUARIO_KEY)
+      limparSessao()
       window.location.reload()
     }
 

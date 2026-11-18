@@ -1,19 +1,14 @@
 import { useState } from 'react'
-import {
-  AlertCircle,
-  GraduationCap,
-  Loader2,
-  Lock,
-  Mail,
-  User,
-} from 'lucide-react'
+import { GraduationCap, Loader2, Lock, Mail, User } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-
-const CAMPO =
-  'w-full rounded-lg border border-[#CBD6C8] bg-white py-3 pl-11 pr-4 text-[15px] text-[#12251D] placeholder:text-[#9AA79D] outline-none transition-colors focus:border-[#2F6F4E] focus:ring-[3px] focus:ring-[#2F6F4E]/15 disabled:cursor-not-allowed disabled:bg-[#F0F2EC]'
-const ROTULO = 'mb-1.5 block text-sm font-medium text-[#33473C]'
-const ICONE =
-  'pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A9A8F]'
+import FeedbackBanner from '../components/FeedbackBanner'
+import { mensagemDeErro } from '../services/api'
+import {
+  BOTAO_PRIMARIO,
+  CAMPO_AUTH,
+  ICONE_CAMPO,
+  ROTULO_AUTH,
+} from '../styles/ui'
 
 export default function AuthPage() {
   const { login, registrar } = useAuth()
@@ -25,6 +20,13 @@ export default function AuthPage() {
   const [carregando, setCarregando] = useState(false)
 
   const cadastro = modo === 'cadastro'
+  const rotuloBotao = carregando
+    ? cadastro
+      ? 'Criando conta...'
+      : 'Entrando...'
+    : cadastro
+      ? 'Criar conta'
+      : 'Entrar'
 
   function alternarModo() {
     setModo(cadastro ? 'entrar' : 'cadastro')
@@ -48,8 +50,10 @@ export default function AuthPage() {
       }
     } catch (err) {
       setErro(
-        err.response?.data?.erro ||
+        mensagemDeErro(
+          err,
           'Não foi possível conectar ao servidor. Tente novamente.',
+        ),
       )
     } finally {
       setCarregando(false)
@@ -107,11 +111,11 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
             {cadastro && (
               <div>
-                <label htmlFor="nome" className={ROTULO}>
+                <label htmlFor="nome" className={ROTULO_AUTH}>
                   Nome completo
                 </label>
                 <div className="relative">
-                  <User aria-hidden="true" size={18} className={ICONE} />
+                  <User aria-hidden="true" size={18} className={ICONE_CAMPO} />
                   <input
                     id="nome"
                     name="nome"
@@ -122,18 +126,18 @@ export default function AuthPage() {
                     value={nome}
                     onChange={(event) => setNome(event.target.value)}
                     placeholder="Como podemos chamar você?"
-                    className={CAMPO}
+                    className={CAMPO_AUTH}
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label htmlFor="email" className={ROTULO}>
+              <label htmlFor="email" className={ROTULO_AUTH}>
                 E-mail
               </label>
               <div className="relative">
-                <Mail aria-hidden="true" size={18} className={ICONE} />
+                <Mail aria-hidden="true" size={18} className={ICONE_CAMPO} />
                 <input
                   id="email"
                   name="email"
@@ -144,17 +148,17 @@ export default function AuthPage() {
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   placeholder="voce@exemplo.com"
-                  className={CAMPO}
+                  className={CAMPO_AUTH}
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="senha" className={ROTULO}>
+              <label htmlFor="senha" className={ROTULO_AUTH}>
                 Senha
               </label>
               <div className="relative">
-                <Lock aria-hidden="true" size={18} className={ICONE} />
+                <Lock aria-hidden="true" size={18} className={ICONE_CAMPO} />
                 <input
                   id="senha"
                   name="senha"
@@ -166,7 +170,7 @@ export default function AuthPage() {
                   value={senha}
                   onChange={(event) => setSenha(event.target.value)}
                   placeholder="Sua senha"
-                  className={CAMPO}
+                  className={CAMPO_AUTH}
                 />
               </div>
               {cadastro && (
@@ -176,25 +180,13 @@ export default function AuthPage() {
               )}
             </div>
 
-            {erro && (
-              <div
-                role="alert"
-                className="flex items-start gap-2.5 rounded-lg border border-[#E3C4B5] bg-[#FBEDE7] px-3.5 py-3 text-sm leading-snug text-[#8A3B1E]"
-              >
-                <AlertCircle
-                  aria-hidden="true"
-                  size={18}
-                  className="mt-0.5 shrink-0"
-                />
-                <span>{erro}</span>
-              </div>
-            )}
+            <FeedbackBanner tipo="erro" mensagem={erro} />
 
             <button
               type="submit"
               disabled={carregando}
               aria-busy={carregando}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#173D2E] px-4 py-3 text-[15px] font-semibold text-[#F4F6F0] transition-colors hover:bg-[#1F4D3A] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/30 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F4F6F0] disabled:cursor-not-allowed disabled:opacity-60"
+              className={`${BOTAO_PRIMARIO} w-full px-4 py-3 text-[15px]`}
             >
               {carregando && (
                 <Loader2
@@ -203,13 +195,7 @@ export default function AuthPage() {
                   className="motion-safe:animate-spin"
                 />
               )}
-              {carregando
-                ? cadastro
-                  ? 'Criando conta...'
-                  : 'Entrando...'
-                : cadastro
-                  ? 'Criar conta'
-                  : 'Entrar'}
+              {rotuloBotao}
             </button>
           </form>
 
