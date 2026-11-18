@@ -13,3 +13,14 @@ export function formatarDataSimples(valor) {
 
   return FORMATADOR.format(new Date(`${valor}T00:00:00`))
 }
+
+/** Compara um DateOnly `YYYY-MM-DD` com o dia local atual. */
+export function dataEstaVencida(valor) {
+  if (!valor) return false
+
+  const hoje = new Date()
+  const mes = String(hoje.getMonth() + 1).padStart(2, '0')
+  const dia = String(hoje.getDate()).padStart(2, '0')
+
+  return valor < `${hoje.getFullYear()}-${mes}-${dia}`
+}

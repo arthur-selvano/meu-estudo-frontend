@@ -11,13 +11,15 @@ import PerfilEdicaoModal from '../components/PerfilEdicaoModal'
 import PerfilPublicoModal from '../components/PerfilPublicoModal'
 import { mensagemDeErro } from '../services/api'
 import { BOTAO_PRIMARIO } from '../styles/ui'
+import { PRIORIDADE_PADRAO } from '../utils/prioridades'
 import {
   adicionarTopico,
-  alternarConclusaoTopico,
+  alterarResponsavelTopico,
   convidarMembro,
   criarGrupo,
   listarConvitesPendentes,
   listarMeusGrupos,
+  moverTopico,
   responderConvite,
 } from '../services/grupoService'
 
@@ -111,7 +113,7 @@ export default function Dashboard() {
       setGrupos((atuais) => [...atuais, novoGrupo])
       setGrupoSelecionadoId(novoGrupo.id)
       setFormularioAberto(false)
-      setSucesso('Grupo criado com sucesso.')
+      setSucesso('Quadro criado com sucesso.')
       return true
     })
   }
@@ -138,13 +140,36 @@ export default function Dashboard() {
     })
   }
 
+  function atualizarTopico(grupoId, topicoId, atualizar) {
+    setGrupos((atuais) =>
+      atuais.map((grupo) =>
+        grupo.id === grupoId
+          ? {
+              ...grupo,
+              topicos: grupo.topicos.map((topico) =>
+                topico.id === topicoId ? atualizar(topico) : topico,
+              ),
+            }
+          : grupo,
+      ),
+    )
+  }
+
   function handleAdicionarTopico(dados) {
     if (!grupoSelecionado) return Promise.resolve(false)
 
     const grupoId = grupoSelecionado.id
 
     return executarAcao('topico', async () => {
-      const novoTopico = await adicionarTopico(grupoId, dados)
+      const criado = await adicionarTopico(grupoId, dados)
+      const novoTopico = {
+        ...criado,
+        prioridade: criado.prioridade ?? dados.prioridade ?? PRIORIDADE_PADRAO,
+        responsavelId:
+          criado.responsavelId !== undefined
+            ? criado.responsavelId
+            : (dados.responsavelId ?? null),
+      }
 
       setGrupos((atuais) =>
         atuais.map((grupo) =>
@@ -153,7 +178,7 @@ export default function Dashboard() {
             : grupo,
         ),
       )
-      setSucesso('Tópico adicionado.')
+      setSucesso('Card adicionado.')
       return true
     })
   }
@@ -164,27 +189,82 @@ export default function Dashboard() {
     setSucesso('Perfil atualizado com sucesso.')
   }
 
-  function handleAlternarTopico(topicoId) {
+  function handleMoverTopico(topicoId, colunaId, ordem) {
     if (!grupoSelecionado) return Promise.resolve(false)
 
     const grupoId = grupoSelecionado.id
+    const topicoAnterior = grupoSelecionado.topicos.find(
+      (topico) => topico.id === topicoId,
+    )
 
-    return executarAcao('toggle', async () => {
-      const topicoAtualizado = await alternarConclusaoTopico(grupoId, topicoId)
+    if (!topicoAnterior) return Promise.resolve(false)
 
-      setGrupos((atuais) =>
-        atuais.map((grupo) =>
-          grupo.id === grupoId
-            ? {
-                ...grupo,
-                topicos: grupo.topicos.map((topico) =>
-                  topico.id === topicoId ? topicoAtualizado : topico,
-                ),
-              }
-            : grupo,
-        ),
-      )
-      return true
+    return executarAcao('mover', async () => {
+      atualizarTopico(grupoId, topicoId, (topico) => ({
+        ...topico,
+        colunaId,
+        ordem,
+      }))
+
+      try {
+        const resposta = await moverTopico(topicoId, { colunaId, ordem })
+
+        if (resposta) {
+          atualizarTopico(grupoId, topicoId, (topico) => ({
+            ...topico,
+            ...resposta,
+            colunaId: resposta.colunaId ?? colunaId,
+            ordem: resposta.ordem ?? ordem,
+          }))
+        }
+
+        return true
+      } catch (err) {
+        atualizarTopico(grupoId, topicoId, () => topicoAnterior)
+        throw err
+      }
+    })
+  }
+
+  function handleAlterarResponsavel(topicoId, responsavelId) {
+    if (!grupoSelecionado) return Promise.resolve(false)
+
+    const grupoId = grupoSelecionado.id
+    const topicoAnterior = grupoSelecionado.topicos.find(
+      (topico) => topico.id === topicoId,
+    )
+
+    if (!topicoAnterior) return Promise.resolve(false)
+
+    return executarAcao('responsavel', async () => {
+      atualizarTopico(grupoId, topicoId, (topico) => ({
+        ...topico,
+        responsavelId,
+      }))
+
+      try {
+        const resposta = await alterarResponsavelTopico(
+          topicoId,
+          responsavelId,
+        )
+
+        if (resposta) {
+          atualizarTopico(grupoId, topicoId, (topico) => ({
+            ...topico,
+            ...resposta,
+            responsavelId:
+              resposta.responsavelId !== undefined
+                ? resposta.responsavelId
+                : responsavelId,
+          }))
+        }
+
+        setSucesso('Responsável atualizado.')
+        return true
+      } catch (err) {
+        atualizarTopico(grupoId, topicoId, () => topicoAnterior)
+        throw err
+      }
     })
   }
 
@@ -261,15 +341,16 @@ export default function Dashboard() {
                 acao={acao}
                 onConvidar={handleConvidar}
                 onAdicionarTopico={handleAdicionarTopico}
-                onAlternarTopico={handleAlternarTopico}
+                onMoverTopico={handleMoverTopico}
+                onAlterarResponsavel={handleAlterarResponsavel}
                 onVerPerfil={setPerfilPublicoId}
               />
             ) : (
               <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-[#CBD6C8] bg-white/60 p-8 text-center">
                 <Users aria-hidden="true" size={26} className="text-[#8A9A8F]" />
-                <p className="mt-3 font-serif text-xl">Selecione um grupo</p>
+                <p className="mt-3 font-serif text-xl">Selecione um quadro</p>
                 <p className="mt-1 max-w-xs text-sm text-[#6B7D71]">
-                  Escolha um grupo na lista ou crie o primeiro para começar.
+                  Escolha um quadro na lista ou crie o primeiro para começar.
                 </p>
                 {grupos.length === 0 && (
                   <button
@@ -277,7 +358,7 @@ export default function Dashboard() {
                     onClick={() => setFormularioAberto(true)}
                     className={`${BOTAO_PRIMARIO} mt-4 px-4 py-2.5 text-sm`}
                   >
-                    Criar grupo
+                    Criar quadro
                   </button>
                 )}
               </div>

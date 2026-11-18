@@ -8,11 +8,24 @@ import { api } from './api.js'
  */
 
 /**
+ * @typedef {Object} ColunaKanban
+ * @property {string} id
+ * @property {string} titulo
+ * @property {number} ordem
+ */
+
+/**
  * @typedef {Object} TopicoEstudo
  * @property {string} id
  * @property {string} titulo
  * @property {string|null} descricao
  * @property {string|null} dataPrevista  Formato YYYY-MM-DD.
+ * @property {'BAIXA'|'MEDIA'|'ALTA'} prioridade
+ * @property {string} colunaId
+ * @property {number} ordem
+ * @property {string|null} responsavelId
+ * @property {string|null} responsavelNome
+ * @property {string|null} responsavelFotoUrl
  * @property {boolean} concluido
  * @property {string} criadoPorId
  * @property {string} criadoEm
@@ -23,9 +36,11 @@ import { api } from './api.js'
  * @property {string} id
  * @property {string} titulo
  * @property {string|null} descricao
+ * @property {'PESSOAL'|'TRABALHO_ACADEMICO'} tipo
  * @property {string} donoId
  * @property {string} donoNome
  * @property {string} criadoEm
+ * @property {ColunaKanban[]} colunas
  * @property {MembroGrupo[]} membros
  * @property {TopicoEstudo[]} topicos
  */
@@ -45,7 +60,13 @@ export async function listarMeusGrupos() {
   return data
 }
 
-/** @param {{ titulo: string, descricao?: string|null }} dados */
+/**
+ * @param {{
+ *   titulo: string,
+ *   descricao?: string|null,
+ *   tipo?: 'PESSOAL'|'TRABALHO_ACADEMICO'
+ * }} dados
+ */
 export async function criarGrupo(dados) {
   const { data } = await api.post('/grupos', dados)
   return data
@@ -69,7 +90,13 @@ export async function responderConvite(grupoId, aceitar) {
 
 /**
  * @param {string} grupoId
- * @param {{ titulo: string, descricao?: string|null, dataPrevista?: string|null }} dados
+ * @param {{
+ *   titulo: string,
+ *   descricao?: string|null,
+ *   dataPrevista?: string|null,
+ *   prioridade?: 'BAIXA'|'MEDIA'|'ALTA',
+ *   responsavelId?: string|null
+ * }} dados
  * @returns {Promise<TopicoEstudo>}
  */
 export async function adicionarTopico(grupoId, dados) {
@@ -77,8 +104,31 @@ export async function adicionarTopico(grupoId, dados) {
   return data
 }
 
-/** @param {string} grupoId @param {string} topicoId @returns {Promise<TopicoEstudo>} */
-export async function alternarConclusaoTopico(grupoId, topicoId) {
-  const { data } = await api.patch(`/grupos/${grupoId}/topicos/${topicoId}/concluir`)
-  return data
+/**
+ * Move um card para outra coluna do Kanban, na posição informada.
+ * @param {string} topicoId
+ * @param {{ colunaId: string, ordem: number }} destino
+ * @returns {Promise<TopicoEstudo|null>}
+ */
+export async function moverTopico(topicoId, { colunaId, ordem }) {
+  const { data } = await api.patch(`/topicos/${topicoId}/mover`, {
+    colunaId,
+    ordem,
+  })
+
+  return data ?? null
+}
+
+/**
+ * Define o responsável de um card. `null` remove a atribuição.
+ * @param {string} topicoId
+ * @param {string|null} responsavelId
+ * @returns {Promise<TopicoEstudo|null>}
+ */
+export async function alterarResponsavelTopico(topicoId, responsavelId) {
+  const { data } = await api.patch(`/topicos/${topicoId}/responsavel`, {
+    responsavelId: responsavelId || null,
+  })
+
+  return data ?? null
 }

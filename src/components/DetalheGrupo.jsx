@@ -1,7 +1,15 @@
 import { useState } from 'react'
-import { Loader2, Mail, Plus, Users } from 'lucide-react'
+import {
+  CalendarDays,
+  GraduationCap,
+  Loader2,
+  Mail,
+  Plus,
+  UserRound,
+  Users,
+} from 'lucide-react'
 import StatusBadge from './StatusBadge'
-import ListaTopicos from './ListaTopicos'
+import QuadroKanban from './QuadroKanban'
 import {
   BOTAO_PRIMARIO,
   CAMPO,
@@ -9,6 +17,14 @@ import {
   CARTAO,
   ROTULO,
 } from '../styles/ui'
+import { PRIORIDADES, PRIORIDADE_PADRAO } from '../utils/prioridades'
+import {
+  TIPO_TRABALHO_ACADEMICO,
+  ehQuadroPessoal,
+  obterColunas,
+  participantesDoGrupo,
+  tipoDoQuadro,
+} from '../utils/quadro'
 
 export default function DetalheGrupo({
   grupo,
@@ -16,18 +32,27 @@ export default function DetalheGrupo({
   acao,
   onConvidar,
   onAdicionarTopico,
-  onAlternarTopico,
+  onMoverTopico,
+  onAlterarResponsavel,
   onVerPerfil,
 }) {
   const [email, setEmail] = useState('')
   const [titulo, setTitulo] = useState('')
   const [descricao, setDescricao] = useState('')
   const [dataPrevista, setDataPrevista] = useState('')
+  const [prioridade, setPrioridade] = useState(PRIORIDADE_PADRAO)
+  const [responsavelId, setResponsavelId] = useState('')
+
+  const pessoal = ehQuadroPessoal(grupo)
+  const tipo = tipoDoQuadro(grupo)
+  const colunas = obterColunas(grupo)
+  const participantes = participantesDoGrupo(grupo, usuario)
 
   const souDono = grupo.donoId === usuario.id
   const convidando = acao === 'convite'
   const criandoTopico = acao === 'topico'
-  const alternandoTopico = acao === 'toggle'
+  const movendo = acao === 'mover'
+  const alterandoResponsavel = acao === 'responsavel'
 
   async function handleConvidar(event) {
     event.preventDefault()
@@ -52,19 +77,39 @@ export default function DetalheGrupo({
       titulo: titulo.trim(),
       descricao: descricao.trim() || null,
       dataPrevista: dataPrevista || null,
+      prioridade,
+      responsavelId:
+        tipo === TIPO_TRABALHO_ACADEMICO ? responsavelId || null : null,
     })
 
     if (criado) {
       setTitulo('')
       setDescricao('')
       setDataPrevista('')
+      setPrioridade(PRIORIDADE_PADRAO)
+      setResponsavelId('')
     }
   }
 
   return (
     <div className="space-y-5">
       <section className={`${CARTAO} p-5 sm:p-6`}>
-        <h2 className="font-serif text-3xl leading-tight tracking-tight text-[#12251D]">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+            pessoal
+              ? 'border-[#B7D2B4] bg-[#E3EFE0] text-[#245B34]'
+              : 'border-[#CBD6C8] bg-[#F0F4EC] text-[#3F5A45]'
+          }`}
+        >
+          {pessoal ? (
+            <UserRound aria-hidden="true" size={13} />
+          ) : (
+            <GraduationCap aria-hidden="true" size={13} />
+          )}
+          {pessoal ? 'Organização pessoal' : 'Trabalho acadêmico'}
+        </span>
+
+        <h2 className="mt-2 font-serif text-3xl leading-tight tracking-tight text-[#12251D]">
           {grupo.titulo}
         </h2>
 
@@ -90,40 +135,42 @@ export default function DetalheGrupo({
           )}
         </p>
 
-        <div className="mt-5 border-t border-[#E1E8DE] pt-4">
-          <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#33473C]">
-            <Users aria-hidden="true" size={15} />
-            Membros
-          </h3>
+        {(!pessoal || grupo.membros.length > 0) && (
+          <div className="mt-5 border-t border-[#E1E8DE] pt-4">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#33473C]">
+              <Users aria-hidden="true" size={15} />
+              Membros
+            </h3>
 
-          {grupo.membros.length === 0 ? (
-            <p className="mt-2 text-sm text-[#6B7D71]">
-              Nenhum membro convidado ainda.
-            </p>
-          ) : (
-            <ul className="mt-2 flex flex-wrap gap-2">
-              {grupo.membros.map((membro) => (
-                <li
-                  key={membro.usuarioId}
-                  className="flex items-center gap-2 rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] px-3 py-1.5"
-                >
-                  <button
-                    type="button"
-                    onClick={() => onVerPerfil(membro.usuarioId)}
-                    aria-label={`Ver perfil de ${membro.nome}`}
-                    className="rounded-sm text-sm text-[#33473C] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6F4E]/40"
+            {grupo.membros.length === 0 ? (
+              <p className="mt-2 text-sm text-[#6B7D71]">
+                Nenhum membro convidado ainda.
+              </p>
+            ) : (
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {grupo.membros.map((membro) => (
+                  <li
+                    key={membro.usuarioId}
+                    className="flex items-center gap-2 rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] px-3 py-1.5"
                   >
-                    {membro.nome}
-                  </button>
-                  <StatusBadge status={membro.status} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                    <button
+                      type="button"
+                      onClick={() => onVerPerfil(membro.usuarioId)}
+                      aria-label={`Ver perfil de ${membro.nome}`}
+                      className="rounded-sm text-sm text-[#33473C] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6F4E]/40"
+                    >
+                      {membro.nome}
+                    </button>
+                    <StatusBadge status={membro.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </section>
 
-      {souDono && (
+      {souDono && !pessoal && (
         <section className={`${CARTAO} p-5`}>
           <h3 className="font-serif text-xl">Convidar membro</h3>
           <p className="mt-1 text-xs text-[#6B7D71]">
@@ -175,12 +222,20 @@ export default function DetalheGrupo({
       )}
 
       <section className={`${CARTAO} p-5`}>
-        <h3 className="font-serif text-xl">Rotina de estudos</h3>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="font-serif text-xl">Quadro de tarefas</h3>
+          <p className="text-xs text-[#6B7D71]">
+            Arraste os cards entre as colunas.
+          </p>
+        </div>
 
-        <form onSubmit={handleAdicionarTopico} className="mt-3 space-y-3">
+        <form
+          onSubmit={handleAdicionarTopico}
+          className="mt-4 space-y-3 rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] p-3"
+        >
           <div>
             <label htmlFor="topico-titulo" className={ROTULO}>
-              Título do tópico
+              Título do card
             </label>
             <input
               id="topico-titulo"
@@ -212,46 +267,104 @@ export default function DetalheGrupo({
             />
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label htmlFor="topico-data" className={ROTULO}>
-                Data prevista (opcional)
+                Prazo (opcional)
               </label>
-              <input
-                id="topico-data"
-                name="dataPrevista"
-                type="date"
-                disabled={criandoTopico}
-                value={dataPrevista}
-                onChange={(event) => setDataPrevista(event.target.value)}
-                className={CAMPO}
-              />
+              <div className="relative">
+                <CalendarDays
+                  aria-hidden="true"
+                  size={15}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8A9A8F]"
+                />
+                <input
+                  id="topico-data"
+                  name="dataPrevista"
+                  type="date"
+                  disabled={criandoTopico}
+                  value={dataPrevista}
+                  onChange={(event) => setDataPrevista(event.target.value)}
+                  className={`${CAMPO} pl-9`}
+                />
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={criandoTopico || !titulo.trim()}
-              className={`${BOTAO_PRIMARIO} px-4 py-2.5 text-sm`}
-            >
-              {criandoTopico ? (
-                <Loader2
-                  aria-hidden="true"
-                  size={16}
-                  className="motion-safe:animate-spin"
-                />
-              ) : (
-                <Plus aria-hidden="true" size={16} />
-              )}
-              {criandoTopico ? 'Adicionando...' : 'Adicionar tópico'}
-            </button>
+            <div>
+              <label htmlFor="topico-prioridade" className={ROTULO}>
+                Prioridade
+              </label>
+              <select
+                id="topico-prioridade"
+                name="prioridade"
+                disabled={criandoTopico}
+                value={prioridade}
+                onChange={(event) => setPrioridade(event.target.value)}
+                className={CAMPO}
+              >
+                {PRIORIDADES.map((opcao) => (
+                  <option key={opcao.valor} value={opcao.valor}>
+                    {opcao.rotulo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {tipo === TIPO_TRABALHO_ACADEMICO && (
+              <div className="sm:col-span-2">
+                <label htmlFor="topico-responsavel" className={ROTULO}>
+                  Responsável (opcional)
+                </label>
+                <select
+                  id="topico-responsavel"
+                  name="responsavelId"
+                  disabled={criandoTopico}
+                  value={responsavelId}
+                  onChange={(event) => setResponsavelId(event.target.value)}
+                  className={CAMPO}
+                >
+                  <option value="">Sem responsável</option>
+                  {participantes.map((pessoa) => (
+                    <option key={pessoa.id} value={pessoa.id}>
+                      {pessoa.nome}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-[#6B7D71]">
+                  Defina quem fica responsável por este card.
+                </p>
+              </div>
+            )}
           </div>
+
+          <button
+            type="submit"
+            disabled={criandoTopico || !titulo.trim()}
+            className={`${BOTAO_PRIMARIO} w-full px-4 py-2.5 text-sm sm:w-auto`}
+          >
+            {criandoTopico ? (
+              <Loader2
+                aria-hidden="true"
+                size={16}
+                className="motion-safe:animate-spin"
+              />
+            ) : (
+              <Plus aria-hidden="true" size={16} />
+            )}
+            {criandoTopico ? 'Adicionando...' : 'Adicionar card'}
+          </button>
         </form>
 
-        <div className="mt-4">
-          <ListaTopicos
+        <div className="mt-5">
+          <QuadroKanban
             topicos={grupo.topicos}
-            alternando={alternandoTopico}
-            onAlternar={onAlternarTopico}
+            colunas={colunas}
+            tipo={tipo}
+            participantes={participantes}
+            movendo={movendo}
+            alterandoResponsavel={alterandoResponsavel}
+            onMover={onMoverTopico}
+            onAlterarResponsavel={onAlterarResponsavel}
           />
         </div>
       </section>

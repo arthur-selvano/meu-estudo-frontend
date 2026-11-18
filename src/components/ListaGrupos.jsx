@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react'
 import { BOTAO_SECUNDARIO, CARTAO } from '../styles/ui'
+import { ehQuadroPessoal } from '../utils/quadro'
 
 export default function ListaGrupos({
   grupos,
@@ -11,7 +12,7 @@ export default function ListaGrupos({
   return (
     <section className={`${CARTAO} p-4`}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="font-serif text-lg">Meus grupos</h2>
+        <h2 className="font-serif text-lg">Meus quadros</h2>
         <button
           type="button"
           onClick={onAlternarFormulario}
@@ -24,12 +25,13 @@ export default function ListaGrupos({
 
       {grupos.length === 0 ? (
         <p className="mt-3 text-sm text-[#6B7D71]">
-          Você ainda não participa de nenhum grupo.
+          Você ainda não participa de nenhum quadro.
         </p>
       ) : (
         <ul className="mt-3 space-y-1.5">
           {grupos.map((grupo) => {
             const selecionado = grupo.id === selecionadoId
+            const pessoal = ehQuadroPessoal(grupo)
 
             return (
               <li key={grupo.id}>
@@ -44,9 +46,18 @@ export default function ListaGrupos({
                   }`}
                 >
                   <span className="block truncate font-medium">{grupo.titulo}</span>
-                  <span className="mt-0.5 block text-xs text-[#6B7D71]">
+                  <span className="mt-1 flex items-center gap-1.5 text-xs text-[#6B7D71]">
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                        pessoal
+                          ? 'bg-[#D9EBD5] text-[#245B34]'
+                          : 'bg-white text-[#3F5A45]'
+                      }`}
+                    >
+                      {pessoal ? 'Pessoal' : 'Acadêmico'}
+                    </span>
                     {grupo.topicos.length}{' '}
-                    {grupo.topicos.length === 1 ? 'tópico' : 'tópicos'}
+                    {grupo.topicos.length === 1 ? 'card' : 'cards'}
                   </span>
                 </button>
               </li>
