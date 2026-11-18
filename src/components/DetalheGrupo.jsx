@@ -21,7 +21,9 @@ import { PRIORIDADES, PRIORIDADE_PADRAO } from '../utils/prioridades'
 import {
   TIPO_TRABALHO_ACADEMICO,
   ehQuadroPessoal,
+  obterColunaSelecionada,
   obterColunas,
+  obterColunasReais,
   participantesDoGrupo,
   tipoDoQuadro,
 } from '../utils/quadro'
@@ -42,10 +44,14 @@ export default function DetalheGrupo({
   const [dataPrevista, setDataPrevista] = useState('')
   const [prioridade, setPrioridade] = useState(PRIORIDADE_PADRAO)
   const [responsavelId, setResponsavelId] = useState('')
+  const [colunaId, setColunaId] = useState('')
+  const [erroFormulario, setErroFormulario] = useState('')
 
   const pessoal = ehQuadroPessoal(grupo)
   const tipo = tipoDoQuadro(grupo)
   const colunas = obterColunas(grupo)
+  const colunasReais = obterColunasReais(grupo)
+  const colunaSelecionada = obterColunaSelecionada(grupo, colunaId)
   const participantes = participantesDoGrupo(grupo, usuario)
 
   const souDono = grupo.donoId === usuario.id
@@ -73,14 +79,26 @@ export default function DetalheGrupo({
 
     if (criandoTopico) return
 
-    const criado = await onAdicionarTopico({
+    setErroFormulario('')
+
+    if (!colunaSelecionada) {
+      setErroFormulario(
+        'Este quadro não possui colunas Kanban. Recarregue a página e tente novamente.',
+      )
+      return
+    }
+
+    const payload = {
       titulo: titulo.trim(),
+      colunaId: colunaSelecionada.id,
       descricao: descricao.trim() || null,
       dataPrevista: dataPrevista || null,
       prioridade,
       responsavelId:
         tipo === TIPO_TRABALHO_ACADEMICO ? responsavelId || null : null,
-    })
+    }
+
+    const criado = await onAdicionarTopico(payload)
 
     if (criado) {
       setTitulo('')
@@ -88,6 +106,7 @@ export default function DetalheGrupo({
       setDataPrevista('')
       setPrioridade(PRIORIDADE_PADRAO)
       setResponsavelId('')
+      setColunaId('')
     }
   }
 
@@ -267,6 +286,30 @@ export default function DetalheGrupo({
             />
           </div>
 
+          <div>
+            <label htmlFor="topico-coluna" className={ROTULO}>
+              Coluna
+            </label>
+            <select
+              id="topico-coluna"
+              name="colunaId"
+              required
+              disabled={criandoTopico || colunasReais.length === 0}
+              value={colunaSelecionada?.id ?? ''}
+              onChange={(event) => setColunaId(event.target.value)}
+              className={CAMPO}
+            >
+              {colunasReais.map((coluna) => (
+                <option key={coluna.id} value={coluna.id}>
+                  {coluna.titulo}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-[#6B7D71]">
+              O card será criado na coluna selecionada.
+            </p>
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label htmlFor="topico-data" className={ROTULO}>
@@ -336,6 +379,12 @@ export default function DetalheGrupo({
               </div>
             )}
           </div>
+
+          {erroFormulario && (
+            <p role="alert" className="text-xs font-medium text-[#8A3B1E]">
+              {erroFormulario}
+            </p>
+          )}
 
           <button
             type="submit"

@@ -92,6 +92,7 @@ export async function responderConvite(grupoId, aceitar) {
  * @param {string} grupoId
  * @param {{
  *   titulo: string,
+ *   colunaId: string,
  *   descricao?: string|null,
  *   dataPrevista?: string|null,
  *   prioridade?: 'BAIXA'|'MEDIA'|'ALTA',

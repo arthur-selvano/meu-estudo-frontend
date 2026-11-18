@@ -22,13 +22,40 @@ export function tipoDoQuadro(grupo) {
   return grupo?.tipo === TIPO_PESSOAL ? TIPO_PESSOAL : TIPO_PADRAO
 }
 
-/** Colunas do quadro, ordenadas; cai nas colunas padrão quando ausentes. */
-export function obterColunas(grupo) {
+/**
+ * Colunas realmente devolvidas pela API, ordenadas. Seus ids são os GUIDs
+ * persistidos no banco e são os únicos valores válidos para criar/mover cards.
+ */
+export function obterColunasReais(grupo) {
   const colunas = Array.isArray(grupo?.colunas) ? grupo.colunas : []
 
-  const normalizadas = [...colunas]
+  return [...colunas]
     .filter((coluna) => coluna?.id && coluna?.titulo)
     .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0))
+}
+
+/**
+ * Coluna inicial do quadro (menor ordem, ou seja, "A Fazer" nos quadros padrão).
+ * Retorna `null` quando a API não devolveu colunas reais; os ids de
+ * `COLUNAS_PADRAO` não servem para criar cards no backend.
+ */
+export function obterColunaInicial(grupo) {
+  return obterColunasReais(grupo)[0] ?? null
+}
+
+/**
+ * Coluna escolhida no formulário de criação. Se o id não existir no quadro
+ * (ou nenhuma escolha tiver sido feita), usa a coluna inicial.
+ */
+export function obterColunaSelecionada(grupo, colunaId) {
+  const colunas = obterColunasReais(grupo)
+
+  return colunas.find((coluna) => coluna.id === colunaId) ?? colunas[0] ?? null
+}
+
+/** Colunas do quadro, ordenadas; cai nas colunas padrão quando ausentes. */
+export function obterColunas(grupo) {
+  const normalizadas = obterColunasReais(grupo)
 
   return normalizadas.length > 0 ? normalizadas : COLUNAS_PADRAO
 }
