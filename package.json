@@ -12,6 +12,7 @@
     "start": "vite build && vite preview --port 5173"
   },
   "dependencies": {
+    "@microsoft/signalr": "^11.0.0",
     "axios": "^1.21.1",
     "lucide-react": "^1.75.0",
     "react": "^19.3.1",

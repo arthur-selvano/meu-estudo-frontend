@@ -2,6 +2,8 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import {
   COLUNAS_PADRAO,
+  adicionarTopicoNoGrupo,
+  atualizarTopicoNoGrupo,
   obterColunaInicial,
   obterColunaSelecionada,
   obterColunas,
@@ -105,4 +107,81 @@ test('obterColunaSelecionada ignora id inválido e volta para a primeira coluna'
 test('obterColunaSelecionada retorna null quando não há colunas reais', () => {
   assert.equal(obterColunaSelecionada({ colunas: [] }, ''), null)
   assert.equal(obterColunaSelecionada({}, 'A_FAZER'), null)
+})
+
+const GRUPO_A = {
+  id: 'grupo-a',
+  topicos: [
+    { id: 'card-1', titulo: 'Card 1', colunaId: 'coluna-1' },
+    { id: 'card-2', titulo: 'Card 2', colunaId: 'coluna-1' },
+  ],
+}
+
+const GRUPO_B = {
+  id: 'grupo-b',
+  topicos: [{ id: 'card-9', titulo: 'Card 9', colunaId: 'coluna-x' }],
+}
+
+test('atualizarTopicoNoGrupo substitui o card existente sem duplicar', () => {
+  const grupos = atualizarTopicoNoGrupo([GRUPO_A], 'grupo-a', {
+    id: 'card-1',
+    titulo: 'Card 1',
+    colunaId: 'coluna-2',
+    responsavelNome: 'Ana',
+  })
+
+  assert.equal(grupos[0].topicos.length, 2)
+  assert.equal(grupos[0].topicos[0].colunaId, 'coluna-2')
+  assert.equal(grupos[0].topicos[0].responsavelNome, 'Ana')
+})
+
+test('atualizarTopicoNoGrupo insere um card novo', () => {
+  const grupos = atualizarTopicoNoGrupo([GRUPO_A], 'grupo-a', {
+    id: 'card-3',
+    titulo: 'Card 3',
+    colunaId: 'coluna-1',
+  })
+
+  assert.equal(grupos[0].topicos.length, 3)
+  assert.equal(grupos[0].topicos[2].id, 'card-3')
+})
+
+test('atualizarTopicoNoGrupo não altera outros quadros', () => {
+  const grupos = atualizarTopicoNoGrupo([GRUPO_A, GRUPO_B], 'grupo-a', {
+    id: 'card-1',
+    titulo: 'Card 1',
+    colunaId: 'coluna-2',
+  })
+
+  assert.equal(grupos[1], GRUPO_B)
+})
+
+test('atualizarTopicoNoGrupo é idempotente para o mesmo evento', () => {
+  const evento = { id: 'card-1', titulo: 'Card 1', colunaId: 'coluna-2' }
+
+  const umaVez = atualizarTopicoNoGrupo([GRUPO_A], 'grupo-a', evento)
+  const duasVezes = atualizarTopicoNoGrupo(umaVez, 'grupo-a', evento)
+
+  assert.equal(duasVezes[0].topicos.length, 2)
+})
+
+test('atualizarTopicoNoGrupo mantém os demais quadros quando o grupo não existe', () => {
+  const grupos = atualizarTopicoNoGrupo([GRUPO_B], 'grupo-inexistente', {
+    id: 'card-1',
+  })
+
+  assert.deepEqual(grupos, [GRUPO_B])
+})
+
+test('adicionarTopicoNoGrupo não duplica quando o eco chega antes da resposta', () => {
+  const criado = { id: 'card-3', titulo: 'Card 3', colunaId: 'coluna-1' }
+
+  const comEco = atualizarTopicoNoGrupo([GRUPO_A], 'grupo-a', criado)
+  const comResposta = adicionarTopicoNoGrupo(comEco, 'grupo-a', criado)
+
+  assert.equal(comResposta[0].topicos.length, 3)
+  assert.equal(
+    comResposta[0].topicos.filter((topico) => topico.id === 'card-3').length,
+    1,
+  )
 })

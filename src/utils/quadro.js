@@ -134,3 +134,33 @@ export function participantesDoGrupo(grupo, usuario) {
     return true
   })
 }
+
+/**
+ * Aplica um evento em tempo real ao estado dos quadros. Substitui o card por id
+ * quando ele já existe e insere quando é novo; grupos com outro id ficam intocados.
+ */
+export function atualizarTopicoNoGrupo(grupos, grupoId, topico) {
+  return (grupos ?? []).map((grupo) => {
+    if (grupo.id !== grupoId) return grupo
+
+    const topicos = grupo.topicos ?? []
+
+    return {
+      ...grupo,
+      topicos: topicos.some((item) => item.id === topico.id)
+        ? topicos.map((item) =>
+            item.id === topico.id ? { ...item, ...topico } : item,
+          )
+        : [...topicos, topico],
+    }
+  })
+}
+
+/**
+ * Aplica a resposta de criação de um card. O evento em tempo real pode chegar antes
+ * desta resposta, por isso a operação precisa ser idempotente: delega ao mesmo
+ * upsert usado pelos eventos.
+ */
+export function adicionarTopicoNoGrupo(grupos, grupoId, topico) {
+  return atualizarTopicoNoGrupo(grupos, grupoId, topico)
+}

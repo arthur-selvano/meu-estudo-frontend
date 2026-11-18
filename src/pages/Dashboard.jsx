@@ -10,8 +10,13 @@ import FeedbackBanner from '../components/FeedbackBanner'
 import PerfilEdicaoModal from '../components/PerfilEdicaoModal'
 import PerfilPublicoModal from '../components/PerfilPublicoModal'
 import { mensagemDeErro } from '../services/api'
+import { conectarTempoReal } from '../services/realtimeService'
 import { BOTAO_PRIMARIO } from '../styles/ui'
 import { PRIORIDADE_PADRAO } from '../utils/prioridades'
+import {
+  adicionarTopicoNoGrupo,
+  atualizarTopicoNoGrupo,
+} from '../utils/quadro'
 import {
   adicionarTopico,
   alterarResponsavelTopico,
@@ -63,6 +68,22 @@ export default function Dashboard() {
 
     aplicarDados(gruposCarregados, convitesCarregados, preferidoId)
   }
+
+  useEffect(() => {
+    const desconectar = conectarTempoReal({
+      onTopicoAtualizado: ({ grupoId, topico }) => {
+        if (!grupoId || !topico?.id) return
+
+        setGrupos((atuais) => atualizarTopicoNoGrupo(atuais, grupoId, topico))
+      },
+      onReconectado: () => {
+        // Eventos perdidos durante a queda de conexão são recuperados pelo refetch.
+        recarregarDados().catch(() => {})
+      },
+    })
+
+    return desconectar
+  }, [])
 
   useEffect(() => {
     let ativo = true
@@ -171,13 +192,7 @@ export default function Dashboard() {
             : (dados.responsavelId ?? null),
       }
 
-      setGrupos((atuais) =>
-        atuais.map((grupo) =>
-          grupo.id === grupoId
-            ? { ...grupo, topicos: [...grupo.topicos, novoTopico] }
-            : grupo,
-        ),
-      )
+      setGrupos((atuais) => adicionarTopicoNoGrupo(atuais, grupoId, novoTopico))
       setSucesso('Card adicionado.')
       return true
     })
