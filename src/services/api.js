@@ -4,7 +4,7 @@ export const TOKEN_KEY = 'token'
 export const USUARIO_KEY = 'usuario'
 
 const API_BASE_URL =
-  import.meta.env?.VITE_API_URL || 'http://localhost:5123/api'
+  import.meta.env?.VITE_API_URL || 'https://meu-estudos-backend.onrender.com/api'
 
 export const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '')
 
