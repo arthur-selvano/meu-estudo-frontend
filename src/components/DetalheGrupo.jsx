@@ -5,12 +5,16 @@ import {
   Loader2,
   Mail,
   Plus,
+  Trash2,
+  UserMinus,
   UserRound,
   Users,
 } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 import QuadroKanban from './QuadroKanban'
 import {
+  BOTAO_ICONE_PERIGO,
+  BOTAO_PERIGO,
   BOTAO_PRIMARIO,
   CAMPO,
   CAMPO_ICONE,
@@ -37,6 +41,8 @@ export default function DetalheGrupo({
   onMoverTopico,
   onAlterarResponsavel,
   onVerPerfil,
+  onRemoverMembro,
+  onExcluirQuadro,
 }) {
   const [email, setEmail] = useState('')
   const [titulo, setTitulo] = useState('')
@@ -113,41 +119,54 @@ export default function DetalheGrupo({
   return (
     <div className="space-y-5">
       <section className={`${CARTAO} p-4 sm:p-5`}>
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
-            pessoal
-              ? 'border-[#B7D2B4] bg-[#E3EFE0] text-[#245B34]'
-              : 'border-[#CBD6C8] bg-[#F0F4EC] text-[#3F5A45]'
-          }`}
-        >
-          {pessoal ? (
-            <UserRound aria-hidden="true" size={13} />
-          ) : (
-            <GraduationCap aria-hidden="true" size={13} />
-          )}
-          {pessoal ? 'Organização pessoal' : 'Trabalho acadêmico'}
-        </span>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+              pessoal
+                ? 'border-success-line bg-success-bg text-success-ink'
+                : 'border-line bg-surface-soft text-ink-soft'
+            }`}
+          >
+            {pessoal ? (
+              <UserRound aria-hidden="true" size={13} />
+            ) : (
+              <GraduationCap aria-hidden="true" size={13} />
+            )}
+            {pessoal ? 'Organização pessoal' : 'Trabalho acadêmico'}
+          </span>
 
-        <h2 className="mt-2 break-words font-serif text-2xl leading-tight tracking-tight text-[#12251D] sm:text-3xl">
+          {souDono && (
+            <button
+              type="button"
+              onClick={onExcluirQuadro}
+              className={`${BOTAO_PERIGO} min-h-9 px-3 py-1.5 text-xs`}
+            >
+              <Trash2 aria-hidden="true" size={14} />
+              Excluir quadro
+            </button>
+          )}
+        </div>
+
+        <h2 className="mt-2 break-words font-serif text-2xl leading-tight tracking-tight text-ink sm:text-3xl">
           {grupo.titulo}
         </h2>
 
         {grupo.descricao && (
-          <p className="mt-2 max-w-2xl break-words text-sm leading-relaxed text-[#53655C]">
+          <p className="mt-2 max-w-2xl break-words text-sm leading-relaxed text-ink-secondary">
             {grupo.descricao}
           </p>
         )}
 
-        <p className="mt-3 break-words text-sm text-[#53655C]">
+        <p className="mt-3 break-words text-sm text-ink-secondary">
           Dono:{' '}
           {souDono ? (
-            <span className="font-medium text-[#12251D]">você</span>
+            <span className="font-medium text-ink">você</span>
           ) : (
             <button
               type="button"
               onClick={() => onVerPerfil(grupo.donoId)}
               aria-label={`Ver perfil de ${grupo.donoNome}`}
-              className="rounded-sm font-medium text-[#12251D] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6F4E]/40"
+              className="rounded-sm font-medium text-ink underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
             >
               {grupo.donoNome}
             </button>
@@ -155,14 +174,14 @@ export default function DetalheGrupo({
         </p>
 
         {(!pessoal || grupo.membros.length > 0) && (
-          <div className="mt-5 border-t border-[#E1E8DE] pt-4">
-            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-[#33473C]">
+          <div className="mt-5 border-t border-line-soft pt-4">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold text-ink-soft">
               <Users aria-hidden="true" size={15} />
               Membros
             </h3>
 
             {grupo.membros.length === 0 ? (
-              <p className="mt-2 text-sm text-[#6B7D71]">
+              <p className="mt-2 text-sm text-ink-muted">
                 Nenhum membro convidado ainda.
               </p>
             ) : (
@@ -170,17 +189,36 @@ export default function DetalheGrupo({
                 {grupo.membros.map((membro) => (
                   <li
                     key={membro.usuarioId}
-                    className="flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] px-3 py-1.5"
+                    className="flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-line-soft bg-surface-muted px-3 py-1.5"
                   >
                     <button
                       type="button"
                       onClick={() => onVerPerfil(membro.usuarioId)}
                       aria-label={`Ver perfil de ${membro.nome}`}
-                      className="break-words rounded-sm text-left text-sm text-[#33473C] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6F4E]/40"
+                      className="break-words rounded-sm text-left text-sm text-ink-soft underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
                     >
                       {membro.nome}
                     </button>
                     <StatusBadge status={membro.status} />
+                    {souDono && (
+                      <button
+                        type="button"
+                        onClick={() => onRemoverMembro(membro)}
+                        aria-label={
+                          membro.status === 'Pendente'
+                            ? `Cancelar convite de ${membro.nome}`
+                            : `Remover ${membro.nome} do quadro`
+                        }
+                        title={
+                          membro.status === 'Pendente'
+                            ? 'Cancelar convite'
+                            : 'Remover do quadro'
+                        }
+                        className={`${BOTAO_ICONE_PERIGO} h-6 w-6 shrink-0`}
+                      >
+                        <UserMinus aria-hidden="true" size={13} />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -192,7 +230,7 @@ export default function DetalheGrupo({
       {souDono && !pessoal && (
         <section className={`${CARTAO} p-4 sm:p-5`}>
           <h3 className="font-serif text-lg sm:text-xl">Convidar membro</h3>
-          <p className="mt-1 text-xs text-[#6B7D71]">
+          <p className="mt-1 text-xs text-ink-muted">
             A pessoa precisa já ter uma conta no MeuEstudos.
           </p>
 
@@ -204,7 +242,7 @@ export default function DetalheGrupo({
               <Mail
                 aria-hidden="true"
                 size={16}
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8A9A8F]"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
               />
               <label htmlFor="convite-email" className="sr-only">
                 E-mail do convidado
@@ -245,14 +283,14 @@ export default function DetalheGrupo({
           <h3 className="min-w-0 font-serif text-lg sm:text-xl">
             Quadro de tarefas
           </h3>
-          <p className="break-words text-xs text-[#6B7D71]">
+          <p className="break-words text-xs text-ink-muted">
             Arraste os cards ou use “Mover para…”.
           </p>
         </div>
 
         <form
           onSubmit={handleAdicionarTopico}
-          className="mt-4 space-y-3 rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] p-3"
+          className="mt-4 space-y-3 rounded-lg border border-line-soft bg-surface-muted p-3"
         >
           <div>
             <label htmlFor="topico-titulo" className={ROTULO}>
@@ -307,7 +345,7 @@ export default function DetalheGrupo({
                 </option>
               ))}
             </select>
-            <p className="mt-1 text-xs text-[#6B7D71]">
+            <p className="mt-1 text-xs text-ink-muted">
               O card será criado na coluna selecionada.
             </p>
           </div>
@@ -321,7 +359,7 @@ export default function DetalheGrupo({
                 <CalendarDays
                   aria-hidden="true"
                   size={15}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#8A9A8F]"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
                 />
                 <input
                   id="topico-data"
@@ -375,7 +413,7 @@ export default function DetalheGrupo({
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-xs text-[#6B7D71]">
+                <p className="mt-1 text-xs text-ink-muted">
                   Defina quem fica responsável por este card.
                 </p>
               </div>
@@ -383,7 +421,7 @@ export default function DetalheGrupo({
           </div>
 
           {erroFormulario && (
-            <p role="alert" className="text-xs font-medium text-[#8A3B1E]">
+            <p role="alert" className="text-xs font-medium text-danger-ink">
               {erroFormulario}
             </p>
           )}

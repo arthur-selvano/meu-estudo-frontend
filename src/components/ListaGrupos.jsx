@@ -24,7 +24,7 @@ export default function ListaGrupos({
       </div>
 
       {grupos.length === 0 ? (
-        <p className="mt-3 text-sm text-[#6B7D71]">
+        <p className="mt-3 text-sm text-ink-muted">
           Você ainda não participa de nenhum quadro.
         </p>
       ) : (
@@ -39,19 +39,19 @@ export default function ListaGrupos({
                   type="button"
                   onClick={() => onSelecionar(grupo.id)}
                   aria-current={selecionado ? 'true' : undefined}
-                  className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/20 ${
+                  className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/20 ${
                     selecionado
-                      ? 'border-[#8FB08F] bg-[#E3EFE0] text-[#173D2E]'
-                      : 'border-transparent text-[#33473C] hover:bg-[#F0F4EC]'
+                      ? 'border-accent-line bg-accent-soft text-accent-ink'
+                      : 'border-transparent text-ink-soft hover:bg-surface-hover'
                   }`}
                 >
                   <span className="block truncate font-medium">{grupo.titulo}</span>
-                  <span className="mt-1 flex items-center gap-1.5 text-xs text-[#6B7D71]">
+                  <span className="mt-1 flex items-center gap-1.5 text-xs text-ink-muted">
                     <span
                       className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
                         pessoal
-                          ? 'bg-[#D9EBD5] text-[#245B34]'
-                          : 'bg-white text-[#3F5A45]'
+                          ? 'bg-accent-soft text-success-ink'
+                          : 'bg-surface text-ink-soft'
                       }`}
                     >
                       {pessoal ? 'Pessoal' : 'Acadêmico'}

@@ -8,21 +8,21 @@ export default function ConvitesPendentes({ convites, respondendo, onResponder }
       <h2 className="font-serif text-lg">Convites pendentes</h2>
 
       {convites.length === 0 ? (
-        <p className="mt-2 text-sm text-[#6B7D71]">Nenhum convite pendente.</p>
+        <p className="mt-2 text-sm text-ink-muted">Nenhum convite pendente.</p>
       ) : (
         <ul className="mt-3 space-y-3">
           {convites.map((convite) => (
             <li
               key={convite.grupoId}
-              className="rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] p-3"
+              className="rounded-lg border border-line-soft bg-surface-muted p-3"
             >
-              <p className="break-words font-medium text-[#12251D]">
+              <p className="break-words font-medium text-ink">
                 {convite.grupoTitulo}
               </p>
-              <p className="mt-0.5 break-words text-xs text-[#53655C]">
+              <p className="mt-0.5 break-words text-xs text-ink-secondary">
                 Convite de {convite.donoNome}
               </p>
-              <p className="mt-1 flex items-center gap-1.5 text-xs text-[#6B7D71]">
+              <p className="mt-1 flex items-center gap-1.5 text-xs text-ink-muted">
                 <CalendarDays aria-hidden="true" size={13} />
                 {formatarDataHora(convite.convidadoEm)}
               </p>

@@ -1,1 +1,183 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+
+  --page: #f4f6f0;
+  --surface: #ffffff;
+  --surface-muted: #fafbf8;
+  --surface-hover: #eef2ea;
+  --surface-soft: #f0f4ec;
+  --surface-disabled: #f0f2ec;
+
+  --ink: #12251d;
+  --ink-soft: #33473c;
+  --ink-secondary: #53655c;
+  --ink-muted: #6b7d71;
+  --ink-faint: #8a9a8f;
+  --ink-placeholder: #9aa79d;
+
+  --line: #cbd6c8;
+  --line-soft: #e1e8de;
+  --line-faint: #edf1ea;
+  --field-line: #cbd6c8;
+
+  --primary: #173d2e;
+  --primary-hover: #1f4d3a;
+  --on-primary: #f4f6f0;
+  --brand: #2f6f4e;
+  --link: #173d2e;
+
+  --accent-soft: #e3efe0;
+  --accent-line: #8fb08f;
+  --accent-ink: #173d2e;
+
+  --success-bg: #e3efe0;
+  --success-line: #b7d2b4;
+  --success-ink: #245b34;
+  --success-hover: #d2e4ce;
+
+  --warning-bg: #fbf3df;
+  --warning-line: #e7d3a2;
+  --warning-ink: #7a5312;
+
+  --danger-bg: #fbede7;
+  --danger-line: #e3c4b5;
+  --danger-ink: #8a3b1e;
+  --danger-hover: #f3d9ce;
+
+  --neutral-bg: #f0f2ee;
+  --neutral-line: #d7dcd6;
+  --neutral-ink: #67746b;
+
+  --info: #4e6fa8;
+  --amber: #c08a2e;
+
+  --inverse: #12251d;
+  --inverse-ink: #f4f6f0;
+  --inverse-soft: #e7ede2;
+  --inverse-muted: #c7d3c6;
+  --inverse-faint: #8fa392;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --page: #0e1512;
+  --surface: #161f1a;
+  --surface-muted: #1a2420;
+  --surface-hover: #202c26;
+  --surface-soft: #1e2a24;
+  --surface-disabled: #171f1b;
+
+  --ink: #ecf2ed;
+  --ink-soft: #c6d2c9;
+  --ink-secondary: #a8b8ae;
+  --ink-muted: #93a39a;
+  --ink-faint: #809086;
+  --ink-placeholder: #7c8c82;
+
+  --line: #2b3a32;
+  --line-soft: #26332c;
+  --line-faint: #223028;
+  --field-line: #5f7066;
+
+  --primary: #2f6f4e;
+  --primary-hover: #3b8060;
+  --on-primary: #f4f6f0;
+  --brand: #6fb68c;
+  --link: #a3dbb9;
+
+  --accent-soft: #1d3528;
+  --accent-line: #3e7256;
+  --accent-ink: #c7e8d2;
+
+  --success-bg: #183225;
+  --success-line: #2e5741;
+  --success-ink: #97d8ac;
+  --success-hover: #21432f;
+
+  --warning-bg: #322713;
+  --warning-line: #6a5424;
+  --warning-ink: #e9c87e;
+
+  --danger-bg: #35201a;
+  --danger-line: #6e3d2e;
+  --danger-ink: #f2a98e;
+  --danger-hover: #43281f;
+
+  --neutral-bg: #212a25;
+  --neutral-line: #38453d;
+  --neutral-ink: #a5b2a9;
+
+  --info: #83a5dd;
+  --amber: #d9a64b;
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-soft: var(--surface-soft);
+  --color-surface-disabled: var(--surface-disabled);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-ink-placeholder: var(--ink-placeholder);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-faint: var(--line-faint);
+  --color-field-line: var(--field-line);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-brand: var(--brand);
+  --color-link: var(--link);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-line: var(--accent-line);
+  --color-accent-ink: var(--accent-ink);
+  --color-success-bg: var(--success-bg);
+  --color-success-line: var(--success-line);
+  --color-success-ink: var(--success-ink);
+  --color-success-hover: var(--success-hover);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-line: var(--warning-line);
+  --color-warning-ink: var(--warning-ink);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-line: var(--danger-line);
+  --color-danger-ink: var(--danger-ink);
+  --color-danger-hover: var(--danger-hover);
+  --color-neutral-bg: var(--neutral-bg);
+  --color-neutral-line: var(--neutral-line);
+  --color-neutral-ink: var(--neutral-ink);
+  --color-info: var(--info);
+  --color-amber: var(--amber);
+  --color-inverse: var(--inverse);
+  --color-inverse-ink: var(--inverse-ink);
+  --color-inverse-soft: var(--inverse-soft);
+  --color-inverse-muted: var(--inverse-muted);
+  --color-inverse-faint: var(--inverse-faint);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@keyframes toast-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

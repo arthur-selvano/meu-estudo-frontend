@@ -39,6 +39,12 @@ export async function obterPerfilPublico(usuarioId) {
   return data
 }
 
+/** @returns {Promise<PerfilPublico[]>} */
+export async function listarPerfisPublicos() {
+  const { data } = await api.get('/users')
+  return data
+}
+
 /**
  * @param {{ nome: string, bio?: string|null, cursoOuArea?: string|null, instituicao?: string|null, topicosInteresse: string[], topicosAjuda: string[] }} dados
  * @returns {Promise<MeuPerfil>}
