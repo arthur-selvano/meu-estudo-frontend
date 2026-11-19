@@ -3,11 +3,13 @@ import { Loader2, Users } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import Navbar from '../components/Navbar'
+import Comunidade from '../components/Comunidade'
 import ConvitesPendentes from '../components/ConvitesPendentes'
 import ListaGrupos from '../components/ListaGrupos'
 import FormNovoGrupo from '../components/FormNovoGrupo'
 import DetalheGrupo from '../components/DetalheGrupo'
 import FeedbackBanner from '../components/FeedbackBanner'
+import ModalConfirmacao from '../components/ModalConfirmacao'
 import PerfilEdicaoModal from '../components/PerfilEdicaoModal'
 import PerfilPublicoModal from '../components/PerfilPublicoModal'
 import { mensagemDeErro } from '../services/api'
@@ -24,9 +26,11 @@ import {
   alterarResponsavelTopico,
   convidarMembro,
   criarGrupo,
+  excluirGrupo,
   listarConvitesPendentes,
   listarMeusGrupos,
   moverTopico,
+  removerMembro,
   responderConvite,
 } from '../services/grupoService'
 
@@ -50,10 +54,14 @@ export default function Dashboard() {
   const [carregandoInicial, setCarregandoInicial] = useState(true)
   const [erro, setErro] = useState('')
   const [acao, setAcao] = useState('')
-  const [secaoAtiva, setSecaoAtiva] = useState(null)
+  const [visao, setVisao] = useState('quadros')
+  const [secaoAtiva, setSecaoAtiva] = useState('quadros')
+  const [confirmacao, setConfirmacao] = useState(null)
 
   const grupoSelecionado =
     grupos.find((grupo) => grupo.id === grupoSelecionadoId) ?? null
+
+  const confirmando = acao === 'remover-membro' || acao === 'excluir-quadro'
 
   function aplicarDados(gruposCarregados, convitesCarregados, preferidoId) {
     setGrupos(gruposCarregados)
@@ -129,7 +137,25 @@ export default function Dashboard() {
     }
   }
 
+  function handleIrParaSecao(secao) {
+    const trocandoVisao =
+      secao === 'comunidade' ? visao !== 'comunidade' : visao !== 'quadros'
+
+    setVisao(secao === 'comunidade' ? 'comunidade' : 'quadros')
+    setSecaoAtiva(secao)
+
+    if (trocandoVisao) {
+      requestAnimationFrame(() => {
+        const alvo = document.getElementById(secao)
+
+        if (alvo) alvo.scrollIntoView({ block: 'start', behavior: 'smooth' })
+        else window.scrollTo({ top: 0, behavior: 'smooth' })
+      })
+    }
+  }
+
   function handleNovoQuadro() {
+    setVisao('quadros')
     setSecaoAtiva('quadros')
     setFormularioAberto(true)
   }
@@ -166,6 +192,95 @@ export default function Dashboard() {
       mostrarSucesso(aceitar ? 'Convite aceito.' : 'Convite recusado.')
       return true
     })
+  }
+
+  function handleSolicitarRemocaoMembro(membro) {
+    if (!grupoSelecionado) return
+
+    setConfirmacao({
+      tipo: 'membro',
+      grupoId: grupoSelecionado.id,
+      membroId: membro.usuarioId,
+      nome: membro.nome,
+      pendente: membro.status === 'Pendente',
+    })
+  }
+
+  function handleSolicitarExclusaoQuadro() {
+    if (!grupoSelecionado) return
+
+    setConfirmacao({
+      tipo: 'quadro',
+      grupoId: grupoSelecionado.id,
+      titulo: grupoSelecionado.titulo,
+    })
+  }
+
+  function handleConfirmarRemocaoMembro() {
+    if (confirmacao?.tipo !== 'membro') return Promise.resolve(false)
+
+    const { grupoId, membroId, nome, pendente } = confirmacao
+
+    return executarAcao('remover-membro', async () => {
+      await removerMembro(grupoId, membroId)
+
+      setGrupos((atuais) =>
+        atuais.map((grupo) =>
+          grupo.id === grupoId
+            ? {
+                ...grupo,
+                membros: grupo.membros.filter(
+                  (membro) => membro.usuarioId !== membroId,
+                ),
+                // O backend remove a atribuição; o estado local acompanha.
+                topicos: grupo.topicos.map((topico) =>
+                  topico.responsavelId === membroId
+                    ? {
+                        ...topico,
+                        responsavelId: null,
+                        responsavelNome: null,
+                        responsavelFotoUrl: null,
+                      }
+                    : topico,
+                ),
+              }
+            : grupo,
+        ),
+      )
+      setConfirmacao(null)
+      mostrarSucesso(
+        pendente
+          ? `Convite de ${nome || 'membro'} cancelado.`
+          : `${nome || 'Membro'} foi removido do quadro.`,
+      )
+      return true
+    })
+  }
+
+  function handleConfirmarExclusaoQuadro() {
+    if (confirmacao?.tipo !== 'quadro') return Promise.resolve(false)
+
+    const { grupoId, titulo } = confirmacao
+
+    return executarAcao('excluir-quadro', async () => {
+      await excluirGrupo(grupoId)
+
+      const restantes = grupos.filter((grupo) => grupo.id !== grupoId)
+
+      setGrupos(restantes)
+      setGrupoSelecionadoId((atual) =>
+        atual === grupoId ? (restantes[0]?.id ?? null) : atual,
+      )
+      setConfirmacao(null)
+      mostrarSucesso(`Quadro “${titulo}” excluído.`)
+      return true
+    })
+  }
+
+  function fecharConfirmacao() {
+    if (acao !== 'remover-membro' && acao !== 'excluir-quadro') {
+      setConfirmacao(null)
+    }
   }
 
   function atualizarTopico(grupoId, topicoId, atualizar) {
@@ -334,21 +449,31 @@ export default function Dashboard() {
         usuario={usuario}
         convitesPendentes={convites.length}
         secaoAtiva={secaoAtiva}
-        onIrParaSecao={setSecaoAtiva}
+        onIrParaSecao={handleIrParaSecao}
         onNovoQuadro={handleNovoQuadro}
         onSair={logout}
         onAbrirPerfil={() => setPerfilEdicaoAberto(true)}
       />
 
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6">
-        <FeedbackBanner
-          tipo="erro"
-          mensagem={erro}
-          onFechar={() => setErro('')}
-          className="mb-4"
-        />
+        {visao === 'comunidade' ? (
+          <main
+            id="comunidade"
+            tabIndex={-1}
+            className="scroll-mt-28 focus:outline-none md:scroll-mt-20"
+          >
+            <Comunidade usuario={usuario} onVerPerfil={setPerfilPublicoId} />
+          </main>
+        ) : (
+          <>
+            <FeedbackBanner
+              tipo="erro"
+              mensagem={erro}
+              onFechar={() => setErro('')}
+              className="mb-4"
+            />
 
-        <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
+            <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
           <aside className="min-w-0 space-y-4">
             <div
               id="convites"
@@ -394,6 +519,8 @@ export default function Dashboard() {
                 onMoverTopico={handleMoverTopico}
                 onAlterarResponsavel={handleAlterarResponsavel}
                 onVerPerfil={setPerfilPublicoId}
+                onRemoverMembro={handleSolicitarRemocaoMembro}
+                onExcluirQuadro={handleSolicitarExclusaoQuadro}
               />
             ) : (
               <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface/60 p-8 text-center">
@@ -414,7 +541,9 @@ export default function Dashboard() {
               </div>
             )}
           </main>
-        </div>
+            </div>
+          </>
+        )}
       </div>
 
       {perfilEdicaoAberto && (
@@ -428,6 +557,44 @@ export default function Dashboard() {
         <PerfilPublicoModal
           usuarioId={perfilPublicoId}
           onFechar={() => setPerfilPublicoId(null)}
+        />
+      )}
+
+      {confirmacao && (
+        <ModalConfirmacao
+          titulo={
+            confirmacao.tipo === 'membro'
+              ? confirmacao.pendente
+                ? 'Cancelar convite'
+                : 'Remover membro'
+              : 'Excluir quadro'
+          }
+          mensagem={
+            confirmacao.tipo === 'membro'
+              ? confirmacao.pendente
+                ? 'O convite pendente será cancelado e a pessoa não poderá mais entrar no quadro por ele.'
+                : 'A pessoa perderá o acesso ao quadro. Os cards atribuídos a ela ficarão sem responsável.'
+              : 'Todos os cards, colunas e membros deste quadro serão removidos. Esta ação não pode ser desfeita.'
+          }
+          detalhe={
+            confirmacao.tipo === 'membro'
+              ? confirmacao.nome || 'Membro do quadro'
+              : confirmacao.titulo
+          }
+          rotuloConfirmar={
+            confirmacao.tipo === 'membro'
+              ? confirmacao.pendente
+                ? 'Cancelar convite'
+                : 'Remover membro'
+              : 'Excluir quadro'
+          }
+          carregando={confirmando}
+          onConfirmar={
+            confirmacao.tipo === 'membro'
+              ? handleConfirmarRemocaoMembro
+              : handleConfirmarExclusaoQuadro
+          }
+          onFechar={fecharConfirmacao}
         />
       )}
     </div>

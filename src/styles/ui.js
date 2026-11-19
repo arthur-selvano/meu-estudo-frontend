@@ -14,6 +14,12 @@ export const BOTAO_PRIMARIO =
 export const BOTAO_SECUNDARIO =
   'flex items-center justify-center gap-2 rounded-lg border border-field-line font-semibold text-link transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25 disabled:cursor-not-allowed disabled:opacity-60'
 
+export const BOTAO_PERIGO =
+  'flex items-center justify-center gap-2 rounded-lg border border-danger-line bg-danger-bg font-semibold text-danger-ink transition-colors hover:bg-danger-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-danger-ink/30 disabled:cursor-not-allowed disabled:opacity-60'
+
+export const BOTAO_ICONE_PERIGO =
+  'flex items-center justify-center rounded-md text-ink-faint transition-colors hover:bg-danger-bg hover:text-danger-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger-ink/30 disabled:cursor-not-allowed disabled:opacity-50'
+
 export const CARTAO = 'rounded-xl border border-line bg-surface shadow-sm'
 
 export const ICONE_CAMPO =

@@ -64,6 +64,12 @@ function Navegacao({
         onIrParaSecao={onIrParaSecao}
       />
       <LinkSecao
+        secao="comunidade"
+        rotulo="Comunidade"
+        ativo={secaoAtiva === 'comunidade'}
+        onIrParaSecao={onIrParaSecao}
+      />
+      <LinkSecao
         secao="convites"
         rotulo="Convites"
         ativo={secaoAtiva === 'convites'}

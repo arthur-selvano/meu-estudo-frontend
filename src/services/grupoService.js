@@ -89,6 +89,23 @@ export async function responderConvite(grupoId, aceitar) {
 }
 
 /**
+ * Remove um membro ou convite pendente do quadro. Apenas o dono pode executar.
+ * @param {string} grupoId
+ * @param {string} membroId
+ */
+export async function removerMembro(grupoId, membroId) {
+  await api.delete(`/grupos/${grupoId}/membros/${membroId}`)
+}
+
+/**
+ * Exclui o quadro e todo o seu conteúdo. Apenas o dono pode executar.
+ * @param {string} grupoId
+ */
+export async function excluirGrupo(grupoId) {
+  await api.delete(`/grupos/${grupoId}`)
+}
+
+/**
  * @param {string} grupoId
  * @param {{
  *   titulo: string,

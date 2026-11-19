@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { ImagePlus, Loader2, X } from 'lucide-react'
+import { ImagePlus, Loader2, Mail, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Avatar from './Avatar'
 import FeedbackBanner from './FeedbackBanner'
 import Modal from './Modal'
+import ModalConfirmacao from './ModalConfirmacao'
 import SeletorTopicos from './SeletorTopicos'
 import { mensagemDeErro } from '../services/api'
 import {
@@ -21,6 +22,53 @@ import {
 const TAMANHO_MAXIMO_FOTO = 2 * 1024 * 1024
 const TIPOS_DE_FOTO = ['image/jpeg', 'image/png', 'image/webp']
 
+const LIMITE_NOME = 120
+const LIMITE_BIO = 500
+const LIMITE_CURSO = 120
+const LIMITE_INSTITUICAO = 150
+
+function topicosIguais(a, b) {
+  const normalizar = (lista) =>
+    [...(lista ?? [])]
+      .map((topico) => topico.toLocaleLowerCase('pt-BR'))
+      .sort()
+
+  const primeiro = normalizar(a)
+  const segundo = normalizar(b)
+
+  return (
+    primeiro.length === segundo.length &&
+    primeiro.every((topico, indice) => topico === segundo[indice])
+  )
+}
+
+function Contador({ atual, maximo }) {
+  return (
+    <span
+      className={`text-xs ${
+        atual >= maximo ? 'font-medium text-warning-ink' : 'text-ink-muted'
+      }`}
+    >
+      {atual}/{maximo}
+    </span>
+  )
+}
+
+function Secao({ id, titulo, descricao, children }) {
+  return (
+    <section
+      aria-labelledby={id}
+      className="border-t border-line-soft pt-5"
+    >
+      <h3 id={id} className="font-serif text-lg">
+        {titulo}
+      </h3>
+      {descricao && <p className="mt-0.5 text-xs text-ink-muted">{descricao}</p>}
+      <div className="mt-3 space-y-4">{children}</div>
+    </section>
+  )
+}
+
 export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
   const { atualizarUsuario } = useAuth()
 
@@ -28,6 +76,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
   const [perfil, setPerfil] = useState(null)
+  const [confirmarDescarte, setConfirmarDescarte] = useState(false)
 
   const [nome, setNome] = useState('')
   const [bio, setBio] = useState('')
@@ -78,6 +127,32 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
 
     return () => URL.revokeObjectURL(previewUrl)
   }, [previewUrl])
+
+  const alterado =
+    Boolean(perfil) &&
+    (nome.trim() !== (perfil.nome ?? '').trim() ||
+      bio !== (perfil.bio ?? '') ||
+      cursoOuArea !== (perfil.cursoOuArea ?? '') ||
+      instituicao !== (perfil.instituicao ?? '') ||
+      !topicosIguais(topicosInteresse, perfil.topicosInteresse) ||
+      !topicosIguais(topicosAjuda, perfil.topicosAjuda) ||
+      Boolean(arquivoFoto))
+
+  function handleFechar() {
+    if (salvando) return
+
+    if (alterado) {
+      setConfirmarDescarte(true)
+      return
+    }
+
+    onFechar()
+  }
+
+  function descartarFoto() {
+    setArquivoFoto(null)
+    setPreviewUrl(null)
+  }
 
   function handleArquivo(event) {
     const arquivo = event.target.files?.[0]
@@ -140,179 +215,262 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
   return (
     <Modal
       labelledBy="titulo-edicao-perfil"
-      onFechar={onFechar}
+      onFechar={handleFechar}
       bloqueado={salvando}
       className="max-w-2xl"
     >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line-soft bg-surface-muted px-4 py-4 sm:px-5">
-          <div>
-            <h2
-              id="titulo-edicao-perfil"
-              className="font-serif text-2xl leading-tight tracking-tight"
-            >
-              Meu perfil
-            </h2>
-            <p className="mt-0.5 text-xs text-ink-muted">
-              Conte um pouco sobre você e o que gosta de estudar.
-            </p>
-          </div>
+      <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line-soft bg-surface-muted px-4 py-4 sm:px-5">
+        <div>
+          <h2
+            id="titulo-edicao-perfil"
+            className="font-serif text-2xl leading-tight tracking-tight"
+          >
+            Meu perfil
+          </h2>
+          <p className="mt-0.5 text-xs text-ink-muted">
+            Esses dados ficam visíveis para outros membros dos seus quadros.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleFechar}
+          disabled={salvando}
+          aria-label="Fechar edição de perfil"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-ink-secondary transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25 disabled:opacity-50"
+        >
+          <X aria-hidden="true" size={18} />
+        </button>
+      </div>
+
+      {carregando ? (
+        <div className="flex min-h-56 items-center justify-center">
+          <Loader2
+            aria-hidden="true"
+            size={26}
+            className="motion-safe:animate-spin text-brand"
+          />
+          <span className="sr-only">Carregando perfil</span>
+        </div>
+      ) : !perfil ? (
+        <div className="space-y-4 px-4 py-6 sm:px-5">
+          <FeedbackBanner tipo="erro" mensagem={erro} />
           <button
             type="button"
             onClick={onFechar}
-            disabled={salvando}
-            aria-label="Fechar edição de perfil"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-ink-secondary transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25 disabled:opacity-50"
+            className={`${BOTAO_SECUNDARIO} px-4 py-2.5 text-sm`}
           >
-            <X aria-hidden="true" size={18} />
+            Fechar
           </button>
         </div>
-
-        {carregando ? (
-          <div className="flex min-h-56 items-center justify-center">
-            <Loader2
-              aria-hidden="true"
-              size={26}
-              className="motion-safe:animate-spin text-brand"
-            />
-            <span className="sr-only">Carregando perfil</span>
-          </div>
-        ) : !perfil ? (
-          <div className="space-y-4 px-4 py-6 sm:px-5">
-            <FeedbackBanner tipo="erro" mensagem={erro} />
-            <button
-              type="button"
-              onClick={onFechar}
-              className={`${BOTAO_SECUNDARIO} px-4 py-2.5 text-sm`}
-            >
-              Fechar
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSalvar} className="space-y-5 px-4 py-5 sm:px-5">
-            <div className="flex flex-wrap items-center gap-4">
+      ) : (
+        <form onSubmit={handleSalvar} className="px-4 py-5 sm:px-5">
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line-soft bg-surface p-4">
               <Avatar
-                nome={nome}
+                nome={nome || perfil.nome}
                 fotoUrl={previewUrl ?? perfil.fotoUrl}
                 tamanho="xl"
               />
 
-              <div>
-                <input
-                  id="foto-perfil"
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleArquivo}
-                  disabled={salvando}
-                  className="sr-only"
-                />
-                <label
-                  htmlFor="foto-perfil"
-                  className={`${BOTAO_SECUNDARIO} cursor-pointer px-3 py-2 text-sm ${
-                    salvando ? 'pointer-events-none opacity-60' : ''
-                  }`}
-                >
-                  <ImagePlus aria-hidden="true" size={16} />
-                  Trocar foto
-                </label>
+              <div className="min-w-0 flex-1">
+                <p className="break-words font-serif text-xl leading-tight">
+                  {nome.trim() || perfil.nome}
+                </p>
+                <p className="mt-0.5 flex items-center gap-1.5 break-words text-xs text-ink-muted">
+                  <Mail aria-hidden="true" size={13} className="shrink-0" />
+                  {perfil.email}
+                </p>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <input
+                    id="foto-perfil"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleArquivo}
+                    disabled={salvando}
+                    className="sr-only"
+                  />
+                  <label
+                    htmlFor="foto-perfil"
+                    className={`${BOTAO_SECUNDARIO} cursor-pointer px-3 py-2 text-sm ${
+                      salvando ? 'pointer-events-none opacity-60' : ''
+                    }`}
+                  >
+                    <ImagePlus aria-hidden="true" size={16} />
+                    {previewUrl ? 'Escolher outra foto' : 'Trocar foto'}
+                  </label>
+
+                  {previewUrl && (
+                    <button
+                      type="button"
+                      onClick={descartarFoto}
+                      disabled={salvando}
+                      className={`${BOTAO_SECUNDARIO} px-3 py-2 text-sm`}
+                    >
+                      <X aria-hidden="true" size={16} />
+                      Descartar seleção
+                    </button>
+                  )}
+                </div>
+
                 <p className="mt-1.5 text-xs text-ink-muted">
-                  JPEG, PNG ou WebP, até 2 MB.
+                  JPEG, PNG ou WebP, até 2 MB. A foto é salva junto com o perfil.
                 </p>
               </div>
             </div>
 
-            <div>
-              <label htmlFor="perfil-nome" className={ROTULO}>
-                Nome
-              </label>
-              <input
-                id="perfil-nome"
-                type="text"
-                required
-                maxLength={120}
-                disabled={salvando}
-                value={nome}
-                onChange={(event) => setNome(event.target.value)}
-                className={CAMPO}
-              />
-            </div>
+            <FeedbackBanner
+              tipo="erro"
+              mensagem={erro}
+              onFechar={() => setErro('')}
+            />
 
-            <div>
-              <div className="mb-1 flex items-baseline justify-between gap-2">
-                <label htmlFor="perfil-bio" className={`${ROTULO} mb-0`}>
-                  Biografia
-                </label>
-                <span className="text-xs text-ink-muted">{bio.length}/500</span>
-              </div>
-              <textarea
-                id="perfil-bio"
-                rows={3}
-                maxLength={500}
-                disabled={salvando}
-                value={bio}
-                onChange={(event) => setBio(event.target.value)}
-                placeholder="O que você está estudando, seus objetivos..."
-                className={`${CAMPO} resize-y`}
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="min-w-0">
-                <label htmlFor="perfil-curso" className={ROTULO}>
-                  Curso ou área
-                </label>
+            <Secao
+              id="secao-dados-pessoais"
+              titulo="Dados pessoais"
+              descricao="Seu nome e onde você estuda."
+            >
+              <div>
+                <div className="mb-1 flex items-baseline justify-between gap-2">
+                  <label htmlFor="perfil-nome" className={`${ROTULO} mb-0`}>
+                    Nome
+                  </label>
+                  <Contador atual={nome.length} maximo={LIMITE_NOME} />
+                </div>
                 <input
-                  id="perfil-curso"
+                  id="perfil-nome"
                   type="text"
-                  maxLength={120}
+                  required
+                  maxLength={LIMITE_NOME}
                   disabled={salvando}
-                  value={cursoOuArea}
-                  onChange={(event) => setCursoOuArea(event.target.value)}
-                  placeholder="Ex.: Engenharia de Software"
+                  value={nome}
+                  onChange={(event) => setNome(event.target.value)}
                   className={CAMPO}
                 />
               </div>
 
-              <div className="min-w-0">
-                <label htmlFor="perfil-instituicao" className={ROTULO}>
-                  Instituição
+              <div>
+                <label htmlFor="perfil-email" className={ROTULO}>
+                  E-mail
                 </label>
                 <input
-                  id="perfil-instituicao"
-                  type="text"
-                  maxLength={150}
-                  disabled={salvando}
-                  value={instituicao}
-                  onChange={(event) => setInstituicao(event.target.value)}
-                  placeholder="Ex.: Universidade X"
+                  id="perfil-email"
+                  type="email"
+                  disabled
+                  value={perfil.email}
                   className={CAMPO}
                 />
+                <p className="mt-1 text-xs text-ink-muted">
+                  O e-mail de acesso não pode ser alterado por aqui.
+                </p>
               </div>
-            </div>
 
-            <SeletorTopicos
-              id="topicos-interesse"
-              rotulo="Quero estudar"
-              descricao="Tópicos que você quer aprender ou aprofundar."
-              selecionados={topicosInteresse}
-              onChange={setTopicosInteresse}
-              desabilitado={salvando}
-            />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="min-w-0">
+                  <div className="mb-1 flex items-baseline justify-between gap-2">
+                    <label htmlFor="perfil-curso" className={`${ROTULO} mb-0`}>
+                      Curso ou área
+                    </label>
+                    <Contador atual={cursoOuArea.length} maximo={LIMITE_CURSO} />
+                  </div>
+                  <input
+                    id="perfil-curso"
+                    type="text"
+                    maxLength={LIMITE_CURSO}
+                    disabled={salvando}
+                    value={cursoOuArea}
+                    onChange={(event) => setCursoOuArea(event.target.value)}
+                    placeholder="Ex.: Engenharia de Software"
+                    className={CAMPO}
+                  />
+                </div>
 
-            <SeletorTopicos
-              id="topicos-ajuda"
-              rotulo="Posso ajudar"
-              descricao="Tópicos em que você pode ajudar outros membros."
-              selecionados={topicosAjuda}
-              onChange={setTopicosAjuda}
-              desabilitado={salvando}
-            />
+                <div className="min-w-0">
+                  <div className="mb-1 flex items-baseline justify-between gap-2">
+                    <label
+                      htmlFor="perfil-instituicao"
+                      className={`${ROTULO} mb-0`}
+                    >
+                      Instituição
+                    </label>
+                    <Contador
+                      atual={instituicao.length}
+                      maximo={LIMITE_INSTITUICAO}
+                    />
+                  </div>
+                  <input
+                    id="perfil-instituicao"
+                    type="text"
+                    maxLength={LIMITE_INSTITUICAO}
+                    disabled={salvando}
+                    value={instituicao}
+                    onChange={(event) => setInstituicao(event.target.value)}
+                    placeholder="Ex.: Universidade X"
+                    className={CAMPO}
+                  />
+                </div>
+              </div>
+            </Secao>
 
-            <FeedbackBanner tipo="erro" mensagem={erro} />
+            <Secao
+              id="secao-sobre"
+              titulo="Sobre você"
+              descricao="Um resumo do que você está estudando e dos seus objetivos."
+            >
+              <div>
+                <div className="mb-1 flex items-baseline justify-between gap-2">
+                  <label htmlFor="perfil-bio" className={`${ROTULO} mb-0`}>
+                    Biografia
+                  </label>
+                  <Contador atual={bio.length} maximo={LIMITE_BIO} />
+                </div>
+                <textarea
+                  id="perfil-bio"
+                  rows={4}
+                  maxLength={LIMITE_BIO}
+                  disabled={salvando}
+                  value={bio}
+                  onChange={(event) => setBio(event.target.value)}
+                  placeholder="O que você está estudando, seus objetivos..."
+                  className={`${CAMPO} resize-y`}
+                />
+              </div>
+            </Secao>
 
-            <div className="flex flex-col-reverse gap-2 border-t border-line-soft pt-4 sm:flex-row sm:justify-end">
+            <Secao
+              id="secao-estudos"
+              titulo="Interesses e colaboração"
+              descricao="Use até 10 tópicos em cada lista para encontrar pessoas com os mesmos interesses."
+            >
+              <SeletorTopicos
+                id="topicos-interesse"
+                rotulo="Quero estudar"
+                descricao="Tópicos que você quer aprender ou aprofundar."
+                selecionados={topicosInteresse}
+                onChange={setTopicosInteresse}
+                desabilitado={salvando}
+              />
+
+              <SeletorTopicos
+                id="topicos-ajuda"
+                rotulo="Posso ajudar"
+                descricao="Tópicos em que você pode ajudar outros membros."
+                selecionados={topicosAjuda}
+                onChange={setTopicosAjuda}
+                desabilitado={salvando}
+              />
+            </Secao>
+          </div>
+
+          <div className="sticky bottom-0 z-10 -mx-4 mt-6 flex flex-col-reverse gap-2 border-t border-line-soft bg-surface-muted px-4 py-3 sm:-mx-5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <p className="text-xs text-ink-muted" aria-live="polite">
+              {alterado ? 'Você tem alterações não salvas.' : 'Sem alterações.'}
+            </p>
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <button
                 type="button"
-                onClick={onFechar}
+                onClick={handleFechar}
                 disabled={salvando}
                 className={`${BOTAO_SECUNDARIO} min-h-11 w-full px-4 py-2.5 text-sm sm:w-auto`}
               >
@@ -331,11 +489,26 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
                     className="motion-safe:animate-spin"
                   />
                 )}
-                {salvando ? 'Salvando...' : 'Salvar perfil'}
+                {salvando ? 'Salvando...' : 'Salvar alterações'}
               </button>
             </div>
-          </form>
-        )}
+          </div>
+        </form>
+      )}
+
+      {confirmarDescarte && (
+        <ModalConfirmacao
+          titulo="Descartar alterações?"
+          mensagem="As informações editadas e a foto selecionada serão perdidas."
+          detalhe="Essa ação não pode ser desfeita."
+          rotuloConfirmar="Descartar"
+          onConfirmar={() => {
+            setConfirmarDescarte(false)
+            onFechar()
+          }}
+          onFechar={() => setConfirmarDescarte(false)}
+        />
+      )}
     </Modal>
   )
 }

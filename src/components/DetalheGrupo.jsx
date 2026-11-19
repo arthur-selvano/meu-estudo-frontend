@@ -5,12 +5,16 @@ import {
   Loader2,
   Mail,
   Plus,
+  Trash2,
+  UserMinus,
   UserRound,
   Users,
 } from 'lucide-react'
 import StatusBadge from './StatusBadge'
 import QuadroKanban from './QuadroKanban'
 import {
+  BOTAO_ICONE_PERIGO,
+  BOTAO_PERIGO,
   BOTAO_PRIMARIO,
   CAMPO,
   CAMPO_ICONE,
@@ -37,6 +41,8 @@ export default function DetalheGrupo({
   onMoverTopico,
   onAlterarResponsavel,
   onVerPerfil,
+  onRemoverMembro,
+  onExcluirQuadro,
 }) {
   const [email, setEmail] = useState('')
   const [titulo, setTitulo] = useState('')
@@ -113,20 +119,33 @@ export default function DetalheGrupo({
   return (
     <div className="space-y-5">
       <section className={`${CARTAO} p-4 sm:p-5`}>
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
-            pessoal
-              ? 'border-success-line bg-success-bg text-success-ink'
-              : 'border-line bg-surface-soft text-ink-soft'
-          }`}
-        >
-          {pessoal ? (
-            <UserRound aria-hidden="true" size={13} />
-          ) : (
-            <GraduationCap aria-hidden="true" size={13} />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+              pessoal
+                ? 'border-success-line bg-success-bg text-success-ink'
+                : 'border-line bg-surface-soft text-ink-soft'
+            }`}
+          >
+            {pessoal ? (
+              <UserRound aria-hidden="true" size={13} />
+            ) : (
+              <GraduationCap aria-hidden="true" size={13} />
+            )}
+            {pessoal ? 'Organização pessoal' : 'Trabalho acadêmico'}
+          </span>
+
+          {souDono && (
+            <button
+              type="button"
+              onClick={onExcluirQuadro}
+              className={`${BOTAO_PERIGO} min-h-9 px-3 py-1.5 text-xs`}
+            >
+              <Trash2 aria-hidden="true" size={14} />
+              Excluir quadro
+            </button>
           )}
-          {pessoal ? 'Organização pessoal' : 'Trabalho acadêmico'}
-        </span>
+        </div>
 
         <h2 className="mt-2 break-words font-serif text-2xl leading-tight tracking-tight text-ink sm:text-3xl">
           {grupo.titulo}
@@ -181,6 +200,25 @@ export default function DetalheGrupo({
                       {membro.nome}
                     </button>
                     <StatusBadge status={membro.status} />
+                    {souDono && (
+                      <button
+                        type="button"
+                        onClick={() => onRemoverMembro(membro)}
+                        aria-label={
+                          membro.status === 'Pendente'
+                            ? `Cancelar convite de ${membro.nome}`
+                            : `Remover ${membro.nome} do quadro`
+                        }
+                        title={
+                          membro.status === 'Pendente'
+                            ? 'Cancelar convite'
+                            : 'Remover do quadro'
+                        }
+                        className={`${BOTAO_ICONE_PERIGO} h-6 w-6 shrink-0`}
+                      >
+                        <UserMinus aria-hidden="true" size={13} />
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
