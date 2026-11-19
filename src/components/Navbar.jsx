@@ -201,7 +201,7 @@ export default function Navbar({
               />
             </span>
             <span className="font-serif text-xl tracking-tight text-ink">
-              MeuEstudos
+              Meu Estudo
             </span>
           </a>
 
