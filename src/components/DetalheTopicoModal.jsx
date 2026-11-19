@@ -26,6 +26,7 @@ import {
   removerSubtarefa,
 } from '../services/topicoDetalheService'
 import { TIPO_TRABALHO_ACADEMICO } from '../utils/quadro'
+import { urlHttpSegura } from '../utils/urls'
 
 export default function DetalheTopicoModal({
   topico,
@@ -44,6 +45,7 @@ export default function DetalheTopicoModal({
   const [novaSubtarefa, setNovaSubtarefa] = useState('')
   const [linkTitulo, setLinkTitulo] = useState('')
   const [linkUrl, setLinkUrl] = useState('')
+  const [erroLink, setErroLink] = useState('')
   const [comentario, setComentario] = useState('')
   const [linkFormAberto, setLinkFormAberto] = useState(false)
   const [aba, setAba] = useState('comentarios')
@@ -74,10 +76,16 @@ export default function DetalheTopicoModal({
     event.preventDefault()
 
     const titulo = linkTitulo.trim()
-    const url = linkUrl.trim()
+    const url = urlHttpSegura(linkUrl)
 
-    if (!titulo || !url) return
+    if (!titulo) return
 
+    if (!url) {
+      setErroLink('Informe um link http:// ou https:// válido.')
+      return
+    }
+
+    setErroLink('')
     await atualizar(adicionarLink(topico.id, { titulo, url }, usuario.nome))
     setLinkTitulo('')
     setLinkUrl('')
@@ -295,7 +303,7 @@ export default function DetalheTopicoModal({
                 className="inline-flex max-w-full items-center gap-1 rounded-full border border-line bg-surface px-2 py-0.5 text-xs"
               >
                 <a
-                  href={link.url}
+                  href={urlHttpSegura(link.url) ?? undefined}
                   target="_blank"
                   rel="noreferrer noopener"
                   className="inline-flex min-w-0 items-center gap-1 text-link hover:underline"
@@ -348,8 +356,12 @@ export default function DetalheTopicoModal({
               <input
                 type="url"
                 required
+                maxLength={500}
                 value={linkUrl}
-                onChange={(event) => setLinkUrl(event.target.value)}
+                onChange={(event) => {
+                  setLinkUrl(event.target.value)
+                  setErroLink('')
+                }}
                 placeholder="https://..."
                 aria-label="URL do link"
                 className={`${CAMPO} min-w-0 flex-1 py-1.5 text-xs`}
@@ -361,6 +373,11 @@ export default function DetalheTopicoModal({
               >
                 <Plus aria-hidden="true" size={13} />
               </button>
+              {erroLink && (
+                <p role="alert" className="text-xs text-danger-ink">
+                  {erroLink}
+                </p>
+              )}
             </form>
           )}
         </section>
