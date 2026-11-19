@@ -35,7 +35,7 @@ export default function Avatar({
         src={url}
         alt={`Foto de ${nome}`}
         loading="lazy"
-        className={`shrink-0 rounded-full border border-[#DCE3D8] object-cover ${dimensao} ${className}`}
+        className={`shrink-0 rounded-full border border-line-soft object-cover ${dimensao} ${className}`}
       />
     )
   }
@@ -44,7 +44,7 @@ export default function Avatar({
     <span
       role="img"
       aria-label={`Foto de ${nome}`}
-      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[#173D2E] font-semibold text-[#F4F6F0] ${dimensao} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-on-primary ${dimensao} ${className}`}
     >
       {iniciais(nome)}
     </span>

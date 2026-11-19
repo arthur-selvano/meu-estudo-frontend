@@ -97,9 +97,18 @@ responsáveis e acompanhar prazos. Tudo em português e com layout responsivo.
 ### Experiência de uso e acessibilidade
 
 - Layout mobile-first e responsivo.
+- Navbar superior com atalhos "Quadros" e "Convites" (badge de pendentes),
+  ação rápida "Novo quadro" e menu do usuário (perfil e sair).
+- Tema claro/escuro com persistência: a primeira visita segue o sistema e a
+  escolha do usuário passa a valer nas próximas cargas, sem flash de tema.
+- Toasts para o feedback de ações (criar quadro, convidar, mover card, salvar
+  perfil etc.), com fechamento automático e manual; erros de formulário,
+  login e carregamento continuam em banners inline.
 - Modais baseados no `<dialog>` nativo (foco preso, `Esc` e restauração de foco).
 - Rótulos ARIA, áreas `sr-only` e foco visível nos controles principais.
 - Datas formatadas em pt-BR, sem deslocamento de fuso em campos `DateOnly`.
+- A paleta é definida por tokens semânticos em `src/index.css`, com variantes
+  clara (padrão) e escura (`.dark`).
 
 ## Stack
 
@@ -118,13 +127,16 @@ responsáveis e acompanhar prazos. Tudo em português e com layout responsivo.
 
 ```text
 App
-└── AuthProvider              sessão global (usuario, token, login, logout)
-    └── AuthPage              login e cadastro, quando não há sessão
-    └── Dashboard             convites, lista de quadros e quadro ativo
-        ├── DetalheGrupo      membros, convite e formulário de card
-        │   └── QuadroKanban  colunas, cards, drag-and-drop e responsáveis
-        ├── PerfilEdicaoModal
-        └── PerfilPublicoModal
+└── ThemeProvider             tema claro/escuro (classe `dark` no <html>)
+    └── ToastProvider         fila de toasts e viewport
+        └── AuthProvider      sessão global (usuario, token, login, logout)
+            └── AuthPage      login e cadastro, quando não há sessão
+            └── Dashboard     navbar, convites, lista de quadros e quadro ativo
+                ├── Navbar    atalhos, ação rápida, tema e menu do usuário
+                ├── DetalheGrupo      membros, convite e formulário de card
+                │   └── QuadroKanban  colunas, cards, drag-and-drop e responsáveis
+                ├── PerfilEdicaoModal
+                └── PerfilPublicoModal
 ```
 
 Diretrizes do código:
@@ -133,6 +145,11 @@ Diretrizes do código:
   Componentes e páginas consomem funções desse diretório, nunca `axios` direto.
 - **`src/context/AuthContext.jsx`** centraliza a sessão e é a fonte de verdade
   para `usuario` e `token`.
+- **`src/context/ThemeContext.jsx`** resolve o tema salvo ou do sistema e é a
+  única fonte de verdade para claro/escuro. **`src/context/ToastContext.jsx`**
+  concentra o feedback de ações.
+- **`src/index.css`** é a única fonte de cores: tokens semânticos em `:root` e
+  `.dark`, expostos ao Tailwind com `@theme inline`. Componentes não usam hex.
 - **`src/utils/`** contém funções puras (datas, prioridades, tópicos, regras do
   quadro). É a parte coberta por testes automatizados.
 - **`src/styles/ui.js`** reúne as classes Tailwind compartilhadas de campos,
@@ -219,21 +236,25 @@ porta/host, ajuste a variável **e** o CORS em `MeuEstudos.Api/Program.cs`.
 src/
 ├── components/
 │   ├── Avatar.jsx               Foto ou iniciais do usuário
+│   ├── BotaoTema.jsx            Alternância claro/escuro
 │   ├── ConvitesPendentes.jsx    Convites com aceitar/recusar
-│   ├── DashboardHeader.jsx      Cabeçalho, perfil e logout
 │   ├── DetalheGrupo.jsx         Dados do grupo, membros, convite e novo card
-│   ├── FeedbackBanner.jsx       Banners de erro e sucesso
+│   ├── FeedbackBanner.jsx       Banners inline de erro/sucesso
 │   ├── FormNovoGrupo.jsx        Criação de quadro com escolha do tipo
 │   ├── ListaGrupos.jsx          Lista lateral de quadros
 │   ├── Modal.jsx                Modal acessível sobre <dialog>
+│   ├── Navbar.jsx               Navegação, ação rápida e menu do usuário
 │   ├── PerfilEdicaoModal.jsx    Edição do próprio perfil e foto
 │   ├── PerfilPublicoModal.jsx   Visualização de perfil público
 │   ├── PrioridadeBadge.jsx      Selo de prioridade do card
 │   ├── QuadroKanban.jsx         Colunas, cards, DnD e seletores
 │   ├── SeletorTopicos.jsx       Chips de tópicos com validação
-│   └── StatusBadge.jsx          Selo de status de convite
+│   ├── StatusBadge.jsx          Selo de status de convite
+│   └── ToastViewport.jsx        Toasts de feedback de ações
 ├── context/
-│   └── AuthContext.jsx          Sessão global e persistência no localStorage
+│   ├── AuthContext.jsx          Sessão global e persistência no localStorage
+│   ├── ThemeContext.jsx         Tema claro/escuro e persistência
+│   └── ToastContext.jsx         Fila e API de toasts
 ├── pages/
 │   ├── AuthPage.jsx             Login e cadastro
 │   └── Dashboard.jsx            Orquestra dados, ações e tempo real
@@ -244,16 +265,20 @@ src/
 │   ├── perfilService.js         Perfil, perfil público e upload de foto
 │   └── realtimeService.js       Conexão SignalR com o hub do quadro
 ├── styles/
-│   └── ui.js                    Classes Tailwind compartilhadas
+│   └── ui.js                    Classes Tailwind compartilhadas (tokens)
 ├── utils/
 │   ├── datas.js                 Formatação e comparação de datas pt-BR
 │   ├── imagem.js                Resolve URLs relativas de imagem da API
 │   ├── prioridades.js           Catálogo e estilos de prioridade
 │   ├── quadro.js                Regras de colunas, ordem, participantes e merge
 │   ├── quadro.test.js           Testes das regras do quadro
+│   ├── tema.js                  Resolução de tema salvo/sistema
+│   ├── tema.test.js             Testes das regras de tema
+│   ├── toasts.js                Fila e duração de toasts
+│   ├── toasts.test.js           Testes da fila de toasts
 │   └── topicos.js               Catálogo e validação de tópicos
 ├── App.jsx                      AuthProvider + AuthPage/Dashboard
-├── index.css                    Entrada do Tailwind
+├── index.css                    Tokens de cor (claro/escuro) e entrada do Tailwind
 └── main.jsx                     Bootstrap do React
 ```
 
@@ -341,6 +366,9 @@ topicosInteresse, topicosAjuda, criadoEm }`.
 ## Sessão, permissões e regras
 
 - O JWT e o usuário ficam em `localStorage` nas chaves `token` e `usuario`.
+- O tema fica em `localStorage` na chave `tema`, com valores `claro` e `escuro`.
+  Sem escolha salva (ou com valor inválido), o tema segue
+  `prefers-color-scheme`; uma escolha explícita passa a prevalecer.
 - Respostas `401` limpam a sessão e recarregam a página.
 - Sem sessão, o app mostra a tela de login/cadastro; com sessão, o dashboard.
 - O dono é identificado por `donoId`. Apenas ele vê o formulário de convite.
@@ -358,9 +386,11 @@ npm test
 ```
 
 Os testes usam o runner nativo do Node e cobrem as regras puras de
-`src/utils/quadro.js`: normalização e ordenação de colunas, coluna inicial e
+`src/utils/quadro.js` (normalização e ordenação de colunas, coluna inicial e
 selecionada, agrupamento de cards, cálculo de ordem ao mover, participantes de
-um quadro e aplicação de eventos em tempo real (incluindo idempotência).
+um quadro e aplicação de eventos em tempo real, incluindo idempotência),
+`src/utils/tema.js` (preferência salva, sistema e valor inválido) e
+`src/utils/toasts.js` (fila de no máximo 3 e remoção).
 
 Não há testes de componentes no momento; a build e o lint também servem de
 verificação:
@@ -377,7 +407,8 @@ npm run lint
 - O tempo real cobre apenas atualizações de cards (`TopicoAtualizado`).
 - O drag-and-drop usa a API nativa de HTML5; em dispositivos touch, use o
   seletor **"Mover para…"** de cada card.
-- Os testes automatizados cobrem somente as funções de `src/utils/quadro.js`.
+- Os testes automatizados cobrem as funções de `src/utils/quadro.js`,
+  `src/utils/tema.js` e `src/utils/toasts.js`; não há testes de componentes.
 - `npm run dev` depende de um caminho de projeto sem `#` (veja a seção de HMR).
 
 ## Problemas comuns

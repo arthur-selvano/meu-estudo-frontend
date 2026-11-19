@@ -21,16 +21,16 @@ function formatarMesAno(valor) {
 function GrupoTopicos({ titulo, topicos, vazio }) {
   return (
     <section>
-      <h3 className="text-sm font-semibold text-[#33473C]">{titulo}</h3>
+      <h3 className="text-sm font-semibold text-ink-soft">{titulo}</h3>
 
       {topicos.length === 0 ? (
-        <p className="mt-1.5 text-sm text-[#6B7D71]">{vazio}</p>
+        <p className="mt-1.5 text-sm text-ink-muted">{vazio}</p>
       ) : (
         <ul className="mt-2 flex flex-wrap gap-1.5">
           {topicos.map((topico) => (
             <li
               key={topico}
-              className="max-w-full break-words rounded-full border border-[#CBD6C8] bg-[#F0F4EC] px-2.5 py-1 text-xs text-[#33473C]"
+              className="max-w-full break-words rounded-full border border-line bg-surface-soft px-2.5 py-1 text-xs text-ink-soft"
             >
               {topico}
             </li>
@@ -82,15 +82,15 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
       onFechar={onFechar}
       className="max-w-lg"
     >
-        <div className="flex items-center justify-between gap-3 border-b border-[#E1E8DE] px-4 py-3 sm:px-5">
-          <p className="text-xs font-medium tracking-wide text-[#6B7D71] uppercase">
+        <div className="flex items-center justify-between gap-3 border-b border-line-soft px-4 py-3 sm:px-5">
+          <p className="text-xs font-medium tracking-wide text-ink-muted uppercase">
             Perfil
           </p>
           <button
             type="button"
             onClick={onFechar}
             aria-label="Fechar perfil"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-[#53655C] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-ink-secondary transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25"
           >
             <X aria-hidden="true" size={18} />
           </button>
@@ -101,7 +101,7 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
             <Loader2
               aria-hidden="true"
               size={26}
-              className="motion-safe:animate-spin text-[#2F6F4E]"
+              className="motion-safe:animate-spin text-brand"
             />
             <span className="sr-only">Carregando perfil</span>
           </div>
@@ -137,20 +137,20 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
               <div className="min-w-0">
                 <h2
                   id="titulo-perfil-publico"
-                  className="break-words font-serif text-2xl leading-tight tracking-tight text-[#12251D]"
+                  className="break-words font-serif text-2xl leading-tight tracking-tight text-ink"
                 >
                   {perfil.nome}
                 </h2>
 
                 {(perfil.cursoOuArea || perfil.instituicao) && (
-                  <p className="mt-1 break-words text-sm text-[#53655C]">
+                  <p className="mt-1 break-words text-sm text-ink-secondary">
                     {[perfil.cursoOuArea, perfil.instituicao]
                       .filter(Boolean)
                       .join(' · ')}
                   </p>
                 )}
 
-                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-[#6B7D71]">
+                <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ink-muted">
                   <CalendarDays aria-hidden="true" size={13} />
                   Membro desde {formatarMesAno(perfil.criadoEm)}
                 </p>
@@ -158,10 +158,10 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
             </div>
 
             <section>
-              <h3 className="text-sm font-semibold text-[#33473C]">
+              <h3 className="text-sm font-semibold text-ink-soft">
                 Sobre
               </h3>
-              <p className="mt-1.5 break-words text-sm leading-relaxed text-[#53655C]">
+              <p className="mt-1.5 break-words text-sm leading-relaxed text-ink-secondary">
                 {perfil.bio || 'Ainda não escreveu uma biografia.'}
               </p>
             </section>

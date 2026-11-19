@@ -1,7 +1,7 @@
 const ESTILOS = {
-  Aceito: 'border-[#B7D2B4] bg-[#E3EFE0] text-[#245B34]',
-  Pendente: 'border-[#E7D3A2] bg-[#FBF3DF] text-[#7A5312]',
-  Recusado: 'border-[#D7DCD6] bg-[#F0F2EE] text-[#67746B]',
+  Aceito: 'border-success-line bg-success-bg text-success-ink',
+  Pendente: 'border-warning-line bg-warning-bg text-warning-ink',
+  Recusado: 'border-neutral-line bg-neutral-bg text-neutral-ink',
 }
 
 export default function StatusBadge({ status }) {

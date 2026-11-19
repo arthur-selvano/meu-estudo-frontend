@@ -144,7 +144,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
       bloqueado={salvando}
       className="max-w-2xl"
     >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-[#E1E8DE] bg-[#F9FAF6] px-4 py-4 sm:px-5">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-line-soft bg-surface-muted px-4 py-4 sm:px-5">
           <div>
             <h2
               id="titulo-edicao-perfil"
@@ -152,7 +152,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
             >
               Meu perfil
             </h2>
-            <p className="mt-0.5 text-xs text-[#6B7D71]">
+            <p className="mt-0.5 text-xs text-ink-muted">
               Conte um pouco sobre você e o que gosta de estudar.
             </p>
           </div>
@@ -161,7 +161,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
             onClick={onFechar}
             disabled={salvando}
             aria-label="Fechar edição de perfil"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-[#53655C] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 disabled:opacity-50"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-ink-secondary transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25 disabled:opacity-50"
           >
             <X aria-hidden="true" size={18} />
           </button>
@@ -172,7 +172,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
             <Loader2
               aria-hidden="true"
               size={26}
-              className="motion-safe:animate-spin text-[#2F6F4E]"
+              className="motion-safe:animate-spin text-brand"
             />
             <span className="sr-only">Carregando perfil</span>
           </div>
@@ -214,7 +214,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
                   <ImagePlus aria-hidden="true" size={16} />
                   Trocar foto
                 </label>
-                <p className="mt-1.5 text-xs text-[#6B7D71]">
+                <p className="mt-1.5 text-xs text-ink-muted">
                   JPEG, PNG ou WebP, até 2 MB.
                 </p>
               </div>
@@ -241,7 +241,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
                 <label htmlFor="perfil-bio" className={`${ROTULO} mb-0`}>
                   Biografia
                 </label>
-                <span className="text-xs text-[#6B7D71]">{bio.length}/500</span>
+                <span className="text-xs text-ink-muted">{bio.length}/500</span>
               </div>
               <textarea
                 id="perfil-bio"
@@ -309,7 +309,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
 
             <FeedbackBanner tipo="erro" mensagem={erro} />
 
-            <div className="flex flex-col-reverse gap-2 border-t border-[#E1E8DE] pt-4 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-2 border-t border-line-soft pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={onFechar}

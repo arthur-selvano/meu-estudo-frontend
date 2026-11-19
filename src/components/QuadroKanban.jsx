@@ -12,10 +12,10 @@ import {
 } from '../utils/quadro'
 
 const CORES_COLUNA = [
-  'bg-[#8A9A8F]',
-  'bg-[#C08A2E]',
-  'bg-[#4E6FA8]',
-  'bg-[#2F6F4E]',
+  'bg-ink-faint',
+  'bg-amber',
+  'bg-info',
+  'bg-brand',
 ]
 
 function SeletorResponsavel({
@@ -32,7 +32,7 @@ function SeletorResponsavel({
 
   return (
     <div
-      className="mt-2.5 border-t border-[#EDF1EA] pt-2.5"
+      className="mt-2.5 border-t border-line-faint pt-2.5"
       onDragStart={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -44,14 +44,14 @@ function SeletorResponsavel({
         ) : (
           <span
             aria-hidden="true"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-dashed border-[#CBD6C8] bg-white text-[#8A9A8F]"
+            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-dashed border-line bg-surface text-ink-faint"
           >
             <UserRound size={12} />
           </span>
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-medium text-[#33473C]">
+          <p className="truncate text-xs font-medium text-ink-soft">
             {nome ?? 'Sem responsável'}
           </p>
 
@@ -65,7 +65,7 @@ function SeletorResponsavel({
             onChange={(event) =>
               onAlterarResponsavel(event.target.value || null)
             }
-            className="mt-0.5 min-h-11 w-full rounded-md border border-[#DCE3D8] bg-white px-1.5 py-1 text-[11px] text-[#33473C] outline-none transition-colors focus:border-[#2F6F4E] focus:ring-2 focus:ring-[#2F6F4E]/15 disabled:cursor-wait disabled:opacity-60"
+            className="mt-0.5 min-h-11 w-full rounded-md border border-field-line bg-surface px-1.5 py-1 text-[11px] text-ink-soft outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:cursor-wait disabled:opacity-60"
           >
             <option value="">Sem responsável</option>
             {participantes.map((pessoa) => (
@@ -87,7 +87,7 @@ function SeletorMover({ topico, colunaAtualId, colunas, desabilitado, onMover })
 
   return (
     <div
-      className="mt-2.5 border-t border-[#EDF1EA] pt-2.5"
+      className="mt-2.5 border-t border-line-faint pt-2.5"
       onDragStart={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -103,7 +103,7 @@ function SeletorMover({ topico, colunaAtualId, colunas, desabilitado, onMover })
         onChange={(event) => {
           if (event.target.value) onMover(event.target.value)
         }}
-        className="min-h-11 w-full min-w-0 rounded-md border border-[#DCE3D8] bg-white px-2 py-1.5 text-sm text-[#33473C] outline-none transition-colors focus:border-[#2F6F4E] focus:ring-2 focus:ring-[#2F6F4E]/15 disabled:cursor-wait disabled:opacity-60"
+        className="min-h-11 w-full min-w-0 rounded-md border border-field-line bg-surface px-2 py-1.5 text-sm text-ink-soft outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:cursor-wait disabled:opacity-60"
       >
         <option value="">Mover para…</option>
         {destinos.map((coluna) => (
@@ -141,7 +141,7 @@ function CartaoTopico({
       draggable={!movendo}
       onDragStart={(event) => onDragStart(event, topico)}
       onDragEnd={onDragEnd}
-      className={`min-w-0 rounded-lg border border-[#DCE3D8] bg-white p-3 shadow-sm transition-shadow focus:outline-none focus:ring-[3px] focus:ring-[#2F6F4E]/25 ${
+      className={`min-w-0 rounded-lg border border-line-soft bg-surface p-3 shadow-sm transition-shadow focus:outline-none focus:ring-[3px] focus:ring-brand/25 ${
         arrastando
           ? 'opacity-50'
           : 'hover:shadow-md'
@@ -156,22 +156,22 @@ function CartaoTopico({
         <GripVertical
           aria-hidden="true"
           size={14}
-          className="pointer-coarse:hidden mt-0.5 shrink-0 text-[#B7C3B4]"
+          className="pointer-coarse:hidden mt-0.5 shrink-0 text-ink-faint"
         />
       </div>
 
       <h4
         className={`mt-2 break-words text-sm font-medium leading-snug ${
           colunaConcluida
-            ? 'text-[#6B7D71] line-through'
-            : 'text-[#12251D]'
+            ? 'text-ink-muted line-through'
+            : 'text-ink'
         }`}
       >
         {topico.titulo}
       </h4>
 
       {topico.descricao && (
-        <p className="mt-1 line-clamp-2 break-words text-xs leading-relaxed text-[#6B7D71]">
+        <p className="mt-1 line-clamp-2 break-words text-xs leading-relaxed text-ink-muted">
           {topico.descricao}
         </p>
       )}
@@ -180,8 +180,8 @@ function CartaoTopico({
         <p
           className={`mt-2 flex items-center gap-1 text-xs ${
             vencido
-              ? 'font-medium text-[#8A3B1E]'
-              : 'text-[#6B7D71]'
+              ? 'font-medium text-danger-ink'
+              : 'text-ink-muted'
           }`}
         >
           <CalendarDays aria-hidden="true" size={12} />
@@ -318,14 +318,14 @@ export default function QuadroKanban({
             onDrop={(event) => handleDrop(event, coluna)}
             className={`flex min-h-64 min-w-0 flex-col rounded-xl border transition-colors ${
               sobre
-                ? 'border-[#2F6F4E] bg-[#E3EFE0] ring-2 ring-[#2F6F4E]/15'
-                : 'border-[#DCE3D8] bg-[#EEF2EA]'
+                ? 'border-brand bg-accent-soft ring-2 ring-brand/15'
+                : 'border-line-soft bg-surface-hover'
             }`}
           >
-            <header className="flex items-center justify-between gap-2 border-b border-[#DCE3D8] px-3 py-2.5">
+            <header className="flex items-center justify-between gap-2 border-b border-line-soft px-3 py-2.5">
               <h3
                 id={tituloId}
-                className="flex min-w-0 items-center gap-2 text-sm font-semibold text-[#33473C]"
+                className="flex min-w-0 items-center gap-2 text-sm font-semibold text-ink-soft"
               >
                 <span
                   aria-hidden="true"
@@ -335,14 +335,14 @@ export default function QuadroKanban({
                 />
                 <span className="truncate">{coluna.titulo}</span>
               </h3>
-              <span className="rounded-full bg-white px-2 py-0.5 text-xs font-medium text-[#6B7D71]">
+              <span className="rounded-full bg-surface px-2 py-0.5 text-xs font-medium text-ink-muted">
                 {cards.length}
               </span>
             </header>
 
             <ul className="flex flex-1 flex-col gap-2 p-2">
               {cards.length === 0 ? (
-                <li className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-[#CBD6C8] px-3 py-6 text-center text-xs text-[#8A9A8F]">
+                <li className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-ink-faint">
                   {sobre ? 'Solte o card aqui' : 'Nenhum card'}
                 </li>
               ) : (

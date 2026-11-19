@@ -9,6 +9,16 @@
       content="Organize grupos de estudo, convites e tópicos no MeuEstudos."
     />
     <title>MeuEstudos</title>
+    <script>
+      try {
+        const salvo = localStorage.getItem('tema')
+        const valido = salvo === 'claro' || salvo === 'escuro'
+        const escuro = valido
+          ? salvo === 'escuro'
+          : matchMedia('(prefers-color-scheme: dark)').matches
+        document.documentElement.classList.toggle('dark', escuro)
+      } catch {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

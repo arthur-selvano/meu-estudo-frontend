@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { GraduationCap, Loader2, UserRound } from 'lucide-react'
 import { BOTAO_PRIMARIO, CAMPO, CARTAO, ROTULO } from '../styles/ui'
 import {
@@ -26,6 +26,11 @@ export default function FormNovoGrupo({ aberto, criando, onCriar }) {
   const [titulo, setTitulo] = useState('')
   const [descricao, setDescricao] = useState('')
   const [tipo, setTipo] = useState(TIPO_PADRAO)
+  const tituloRef = useRef(null)
+
+  useEffect(() => {
+    if (aberto) tituloRef.current?.focus()
+  }, [aberto])
 
   if (!aberto) return null
 
@@ -49,7 +54,11 @@ export default function FormNovoGrupo({ aberto, criando, onCriar }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className={`${CARTAO} p-4`}>
+    <form
+      id="novo-quadro"
+      onSubmit={handleSubmit}
+      className={`${CARTAO} scroll-mt-28 p-4 md:scroll-mt-20`}
+    >
       <h2 className="font-serif text-lg">Novo quadro</h2>
 
       <div className="mt-3 space-y-3">
@@ -69,18 +78,18 @@ export default function FormNovoGrupo({ aberto, criando, onCriar }) {
                   className="peer sr-only"
                 />
 
-                <span className="flex gap-2.5 rounded-lg border border-[#CBD6C8] bg-white p-3 transition-colors hover:bg-[#F7F9F4] peer-checked:border-[#2F6F4E] peer-checked:bg-[#E3EFE0] peer-checked:ring-1 peer-checked:ring-[#2F6F4E]/30 peer-focus-visible:ring-[3px] peer-focus-visible:ring-[#2F6F4E]/25">
+                <span className="flex gap-2.5 rounded-lg border border-field-line bg-surface p-3 transition-colors hover:bg-surface-muted peer-checked:border-brand peer-checked:bg-accent-soft peer-checked:ring-1 peer-checked:ring-brand/30 peer-focus-visible:ring-[3px] peer-focus-visible:ring-brand/25">
                   <Icone
                     aria-hidden="true"
                     size={17}
-                    className="mt-0.5 shrink-0 text-[#2F6F4E]"
+                    className="mt-0.5 shrink-0 text-brand"
                   />
 
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold leading-snug text-[#12251D]">
+                    <span className="block text-sm font-semibold leading-snug text-ink">
                       {tituloOpcao}
                     </span>
-                    <span className="mt-0.5 block text-xs leading-snug text-[#6B7D71]">
+                    <span className="mt-0.5 block text-xs leading-snug text-ink-muted">
                       {texto}
                     </span>
                   </span>
@@ -96,6 +105,7 @@ export default function FormNovoGrupo({ aberto, criando, onCriar }) {
           </label>
           <input
             id="novo-grupo-titulo"
+            ref={tituloRef}
             name="titulo"
             type="text"
             required
