@@ -10,7 +10,7 @@ export default function ListaGrupos({
   onAlternarFormulario,
 }) {
   return (
-    <section className={`${CARTAO} p-4`}>
+    <section className={`${CARTAO} min-w-0 p-4`}>
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-serif text-lg">Meus quadros</h2>
         <button

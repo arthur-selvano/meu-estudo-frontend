@@ -30,7 +30,7 @@ export default function FeedbackBanner({
       className={`flex items-start gap-2.5 rounded-lg border px-3.5 py-3 text-sm ${estilo.caixa} ${className}`}
     >
       <Icone aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
-      <p className="flex-1 leading-snug">{mensagem}</p>
+      <p className="flex-1 break-words leading-snug">{mensagem}</p>
       {onFechar && (
         <button
           type="button"

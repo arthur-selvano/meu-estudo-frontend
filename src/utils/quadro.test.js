@@ -4,6 +4,7 @@ import {
   COLUNAS_PADRAO,
   adicionarTopicoNoGrupo,
   atualizarTopicoNoGrupo,
+  calcularOrdemMover,
   obterColunaInicial,
   obterColunaSelecionada,
   obterColunas,
@@ -184,4 +185,26 @@ test('adicionarTopicoNoGrupo não duplica quando o eco chega antes da resposta',
     comResposta[0].topicos.filter((topico) => topico.id === 'card-3').length,
     1,
   )
+})
+
+const COLUNAS_MOVER = [
+  { id: 'fazer', titulo: 'A Fazer', ordem: 0 },
+  { id: 'andamento', titulo: 'Em Andamento', ordem: 1 },
+]
+
+test('calcularOrdemMover conta os cards da coluna destino sem o próprio card', () => {
+  const topicos = [
+    { id: 'card-1', titulo: 'Card 1', colunaId: 'fazer' },
+    { id: 'card-2', titulo: 'Card 2', colunaId: 'fazer' },
+    { id: 'card-3', titulo: 'Card 3', colunaId: 'andamento' },
+  ]
+
+  assert.equal(calcularOrdemMover(topicos, 'card-2', 'andamento', COLUNAS_MOVER), 1)
+  assert.equal(calcularOrdemMover(topicos, 'card-1', 'fazer', COLUNAS_MOVER), 1)
+})
+
+test('calcularOrdemMover devolve 0 para coluna destino vazia', () => {
+  const topicos = [{ id: 'card-1', titulo: 'Card 1', colunaId: 'fazer' }]
+
+  assert.equal(calcularOrdemMover(topicos, 'card-1', 'andamento', COLUNAS_MOVER), 0)
 })

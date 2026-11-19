@@ -5,7 +5,7 @@ import { BOTAO_SECUNDARIO } from '../styles/ui'
 export default function DashboardHeader({ usuario, onSair, onAbrirPerfil }) {
   return (
     <header className="sticky top-0 z-20 border-b border-[#DCE3D8] bg-[#F4F6F0]/95 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#12251D] text-[#F4F6F0]">
             <GraduationCap aria-hidden="true" size={18} strokeWidth={1.8} />
@@ -18,14 +18,14 @@ export default function DashboardHeader({ usuario, onSair, onAbrirPerfil }) {
             type="button"
             onClick={onAbrirPerfil}
             aria-label="Abrir meu perfil"
-            className="flex min-w-0 items-center gap-2 rounded-lg py-1 pr-1 pl-1.5 text-sm text-[#53655C] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25"
+            className="flex min-h-11 min-w-0 items-center gap-2 rounded-lg py-1 pr-1 pl-1.5 text-sm text-[#53655C] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 sm:min-h-0"
           >
             <Avatar
               nome={usuario.nome}
               fotoUrl={usuario.fotoUrl}
               tamanho="sm"
             />
-            <span className="min-w-0 truncate">
+            <span className="hidden min-w-0 truncate sm:inline">
               Olá,{' '}
               <span className="font-medium text-[#12251D]">
                 {usuario.nome}
@@ -36,7 +36,7 @@ export default function DashboardHeader({ usuario, onSair, onAbrirPerfil }) {
           <button
             type="button"
             onClick={onSair}
-            className={`${BOTAO_SECUNDARIO} shrink-0 px-3 py-2 text-sm`}
+            className={`${BOTAO_SECUNDARIO} min-h-11 shrink-0 px-3 py-2 text-sm sm:min-h-0`}
           >
             <LogOut aria-hidden="true" size={15} />
             Sair
