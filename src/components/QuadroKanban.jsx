@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { CalendarDays, GripVertical, UserRound } from 'lucide-react'
+import { CalendarDays, ListChecks, MoreVertical, UserRound } from 'lucide-react'
 import Avatar from './Avatar'
 import PrioridadeBadge from './PrioridadeBadge'
 import { dataEstaVencida, formatarDataSimples } from '../utils/datas'
@@ -11,19 +11,9 @@ import {
   topicosDaColuna,
 } from '../utils/quadro'
 
-const CORES_COLUNA = [
-  'bg-ink-faint',
-  'bg-amber',
-  'bg-info',
-  'bg-brand',
-]
+const CORES_COLUNA = ['bg-ink-faint']
 
-function SeletorResponsavel({
-  topico,
-  participantes,
-  desabilitado,
-  onAlterarResponsavel,
-}) {
+function ResponsavelCartao({ topico, participantes }) {
   const responsavel = participantes.find(
     (pessoa) => pessoa.id === topico.responsavelId,
   )
@@ -31,88 +21,37 @@ function SeletorResponsavel({
   const fotoUrl = responsavel?.fotoUrl ?? topico.responsavelFotoUrl ?? null
 
   return (
-    <div
-      className="mt-2.5 border-t border-line-faint pt-2.5"
-      onDragStart={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-      }}
-    >
-      <div className="flex items-center gap-2">
-        {nome ? (
-          <Avatar nome={nome} fotoUrl={fotoUrl} tamanho="xs" />
-        ) : (
-          <span
-            aria-hidden="true"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-dashed border-line bg-surface text-ink-faint"
-          >
-            <UserRound size={12} />
-          </span>
-        )}
+    <div className="mt-3 flex items-center gap-1.5 border-t border-line-faint pt-2.5">
+      {nome ? (
+        <Avatar nome={nome} fotoUrl={fotoUrl} tamanho="xs" />
+      ) : (
+        <span
+          aria-hidden="true"
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-dashed border-line bg-surface text-ink-faint"
+        >
+          <UserRound size={10} />
+        </span>
+      )}
 
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-medium text-ink-soft">
-            {nome ?? 'Sem responsável'}
-          </p>
-
-          <label htmlFor={`responsavel-${topico.id}`} className="sr-only">
-            Alterar responsável de {topico.titulo}
-          </label>
-          <select
-            id={`responsavel-${topico.id}`}
-            value={topico.responsavelId ?? ''}
-            disabled={desabilitado}
-            onChange={(event) =>
-              onAlterarResponsavel(event.target.value || null)
-            }
-            className="mt-0.5 min-h-11 w-full rounded-md border border-field-line bg-surface px-1.5 py-1 text-[11px] text-ink-soft outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:cursor-wait disabled:opacity-60"
-          >
-            <option value="">Sem responsável</option>
-            {participantes.map((pessoa) => (
-              <option key={pessoa.id} value={pessoa.id}>
-                {pessoa.nome}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <span className="truncate text-[11px] text-ink-muted">
+        {nome ?? 'Sem responsável'}
+      </span>
     </div>
   )
 }
 
-function SeletorMover({ topico, colunaAtualId, colunas, desabilitado, onMover }) {
-  const destinos = colunas.filter((coluna) => coluna.id !== colunaAtualId)
+function ContadorSubtarefas({ detalhe }) {
+  const subtarefas = detalhe?.subtarefas ?? []
 
-  if (destinos.length === 0) return null
+  if (subtarefas.length === 0) return null
+
+  const concluidas = subtarefas.filter((subtarefa) => subtarefa.concluida).length
 
   return (
-    <div
-      className="mt-2.5 border-t border-line-faint pt-2.5"
-      onDragStart={(event) => {
-        event.preventDefault()
-        event.stopPropagation()
-      }}
-    >
-      <label htmlFor={`mover-${topico.id}`} className="sr-only">
-        Mover {topico.titulo} para outra coluna
-      </label>
-      <select
-        id={`mover-${topico.id}`}
-        value=""
-        disabled={desabilitado}
-        onChange={(event) => {
-          if (event.target.value) onMover(event.target.value)
-        }}
-        className="min-h-11 w-full min-w-0 rounded-md border border-field-line bg-surface px-2 py-1.5 text-sm text-ink-soft outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:cursor-wait disabled:opacity-60"
-      >
-        <option value="">Mover para…</option>
-        {destinos.map((coluna) => (
-          <option key={coluna.id} value={coluna.id}>
-            {coluna.titulo}
-          </option>
-        ))}
-      </select>
-    </div>
+    <span className="inline-flex shrink-0 items-center gap-1 text-xs text-ink-muted">
+      <ListChecks aria-hidden="true" size={12} />
+      {concluidas}/{subtarefas.length}
+    </span>
   )
 }
 
@@ -125,14 +64,22 @@ function CartaoTopico({
   colunaConcluida,
   arrastando,
   movendo,
-  alterandoResponsavel,
+  detalhe,
+  onAbrir,
   onDragStart,
   onDragEnd,
-  onAlterarResponsavel,
   onMover,
 }) {
+  const [menuAberto, setMenuAberto] = useState(false)
+
   const vencido =
     !colunaConcluida && dataEstaVencida(topico.dataPrevista)
+  const destinos = colunas.filter((coluna) => coluna.id !== colunaAtualId)
+
+  function moverPara(colunaId) {
+    setMenuAberto(false)
+    onMover(colunaId)
+  }
 
   return (
     <article
@@ -141,33 +88,75 @@ function CartaoTopico({
       draggable={!movendo}
       onDragStart={(event) => onDragStart(event, topico)}
       onDragEnd={onDragEnd}
-      className={`min-w-0 rounded-lg border border-line-soft bg-surface p-3 shadow-sm transition-shadow focus:outline-none focus:ring-[3px] focus:ring-brand/25 ${
-        arrastando
-          ? 'opacity-50'
-          : 'hover:shadow-md'
-      } ${
-        movendo
-          ? 'cursor-wait'
-          : 'cursor-grab active:cursor-grabbing'
-      }`}
+      onClick={(event) => {
+        if (event.target.closest('select, button, a, input, label')) return
+        onAbrir?.(topico)
+      }}
+      className={`min-w-0 rounded-md border border-line bg-surface p-4 focus:outline-none focus:ring-2 focus:ring-brand/25 ${
+        arrastando ? 'opacity-50' : ''
+      } ${movendo ? 'cursor-wait' : 'cursor-grab active:cursor-grabbing'}`}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start gap-2">
         <PrioridadeBadge prioridade={topico.prioridade} />
-        <GripVertical
-          aria-hidden="true"
-          size={14}
-          className="pointer-coarse:hidden mt-0.5 shrink-0 text-ink-faint"
-        />
+        <ContadorSubtarefas detalhe={detalhe} />
+
+        <div
+          className="relative ml-auto shrink-0"
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              setMenuAberto(false)
+            }
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setMenuAberto((aberto) => !aberto)}
+            aria-label={`Ações de ${topico.titulo}`}
+            aria-expanded={menuAberto}
+            className="flex h-7 w-7 items-center justify-center rounded text-ink-muted transition-colors hover:bg-surface-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
+          >
+            <MoreVertical aria-hidden="true" size={15} />
+          </button>
+
+          {menuAberto && (
+            <div className="absolute right-0 top-full z-20 mt-1 w-40 rounded-md border border-line bg-surface p-1">
+              <p className="px-2 py-1 text-[10px] font-medium tracking-wide text-ink-muted uppercase">
+                Mover para
+              </p>
+
+              {destinos.length === 0 ? (
+                <p className="px-2 py-1 text-xs text-ink-faint">
+                  Sem outras colunas
+                </p>
+              ) : (
+                destinos.map((coluna) => (
+                  <button
+                    key={coluna.id}
+                    type="button"
+                    onClick={() => moverPara(coluna.id)}
+                    className="flex w-full items-center rounded px-2 py-1.5 text-left text-xs text-ink-soft transition-colors hover:bg-surface-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
+                  >
+                    {coluna.titulo}
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      <h4
-        className={`mt-2 break-words text-sm font-medium leading-snug ${
-          colunaConcluida
-            ? 'text-ink-muted line-through'
-            : 'text-ink'
-        }`}
-      >
-        {topico.titulo}
+      <h4 className="mt-2.5">
+        <button
+          type="button"
+          onClick={() => onAbrir?.(topico)}
+          className={`break-words text-left text-base font-medium leading-snug focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 ${
+            colunaConcluida
+              ? 'text-ink-muted line-through'
+              : 'text-ink'
+          }`}
+        >
+          {topico.titulo}
+        </button>
       </h4>
 
       {topico.descricao && (
@@ -191,24 +180,165 @@ function CartaoTopico({
       )}
 
       {tipo === TIPO_TRABALHO_ACADEMICO && (
-        <SeletorResponsavel
-          topico={topico}
-          participantes={participantes}
-          desabilitado={alterandoResponsavel || movendo}
-          onAlterarResponsavel={(responsavelId) =>
-            onAlterarResponsavel(topico.id, responsavelId)
-          }
-        />
+        <ResponsavelCartao topico={topico} participantes={participantes} />
       )}
-
-      <SeletorMover
-        topico={topico}
-        colunaAtualId={colunaAtualId}
-        colunas={colunas}
-        desabilitado={movendo}
-        onMover={onMover}
-      />
     </article>
+  )
+}
+
+function ListaTopicos({ topicos, colunas, detalhes, onAbrirDetalhe }) {
+  if (topicos.length === 0) {
+    return <p className="py-6 text-sm text-ink-muted">Nenhum card no quadro.</p>
+  }
+
+  return (
+    <div className="space-y-5">
+      {colunas.map((coluna) => {
+        const cards = topicosDaColuna(topicos, coluna.id, colunas)
+        const concluida = ehColunaConcluida(coluna, colunas)
+
+        return (
+          <section key={coluna.id}>
+            <div className="flex items-center justify-between border-b border-line pb-1.5">
+              <h3 className="text-xs font-semibold tracking-wide text-ink-muted uppercase">
+                {coluna.titulo}
+              </h3>
+              <span className="text-xs text-ink-faint">{cards.length}</span>
+            </div>
+
+            {cards.length === 0 ? (
+              <p className="py-3 text-xs text-ink-faint">Nenhum card.</p>
+            ) : (
+              <ul className="divide-y divide-line-faint">
+                {cards.map((topico) => {
+                  const vencido =
+                    !concluida && dataEstaVencida(topico.dataPrevista)
+
+                  return (
+                    <li key={topico.id}>
+                      <button
+                        type="button"
+                        onClick={() => onAbrirDetalhe?.(topico)}
+                        className="flex w-full items-center gap-3 px-1 py-2 text-left transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
+                      >
+                        <span
+                          className={`min-w-0 flex-1 truncate text-sm ${
+                            concluida
+                              ? 'text-ink-muted line-through'
+                              : 'text-ink'
+                          }`}
+                        >
+                          {topico.titulo}
+                        </span>
+
+                        <ContadorSubtarefas detalhe={detalhes[topico.id]} />
+
+                        {topico.dataPrevista && (
+                          <span
+                            className={`shrink-0 text-xs ${
+                              vencido ? 'text-danger-ink' : 'text-ink-muted'
+                            }`}
+                          >
+                            {formatarDataSimples(topico.dataPrevista)}
+                          </span>
+                        )}
+
+                        <PrioridadeBadge prioridade={topico.prioridade} />
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </section>
+        )
+      })}
+    </div>
+  )
+}
+
+function CronogramaTopicos({ topicos, colunas, detalhes, onAbrirDetalhe }) {
+  const colunaDoTopico = (topico) =>
+    colunas.find((coluna) => coluna.id === idColunaDoTopico(topico, colunas))
+
+  const comData = topicos
+    .filter((topico) => topico.dataPrevista)
+    .sort((a, b) => String(a.dataPrevista).localeCompare(String(b.dataPrevista)))
+
+  const semData = topicos.filter((topico) => !topico.dataPrevista)
+
+  function Linha({ topico }) {
+    const coluna = colunaDoTopico(topico)
+    const concluida = ehColunaConcluida(coluna, colunas)
+    const vencido =
+      !concluida && dataEstaVencida(topico.dataPrevista)
+
+    return (
+      <li className="flex gap-3">
+        <span
+          className={`w-20 shrink-0 pt-2 text-right text-xs ${
+            vencido ? 'font-medium text-danger-ink' : 'text-ink-muted'
+          }`}
+        >
+          {topico.dataPrevista
+            ? formatarDataSimples(topico.dataPrevista)
+            : 'Sem data'}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => onAbrirDetalhe?.(topico)}
+          className="min-w-0 flex-1 rounded-md border border-line bg-surface px-3 py-2 text-left transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
+        >
+          <span
+            className={`block truncate text-sm ${
+              concluida ? 'text-ink-muted line-through' : 'text-ink'
+            }`}
+          >
+            {topico.titulo}
+          </span>
+
+          <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
+            <span>{coluna?.titulo ?? 'Sem coluna'}</span>
+            <ContadorSubtarefas detalhe={detalhes[topico.id]} />
+            <PrioridadeBadge prioridade={topico.prioridade} />
+          </span>
+        </button>
+      </li>
+    )
+  }
+
+  return (
+    <div className="space-y-5">
+      <section>
+        <h3 className="border-b border-line pb-1.5 text-xs font-semibold tracking-wide text-ink-muted uppercase">
+          Com prazo
+        </h3>
+
+        {comData.length === 0 ? (
+          <p className="py-3 text-xs text-ink-faint">Nenhum card com prazo.</p>
+        ) : (
+          <ul className="mt-2 space-y-2">
+            {comData.map((topico) => (
+              <Linha key={topico.id} topico={topico} />
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {semData.length > 0 && (
+        <section>
+          <h3 className="border-b border-line pb-1.5 text-xs font-semibold tracking-wide text-ink-muted uppercase">
+            Sem prazo
+          </h3>
+          <ul className="mt-2 space-y-2">
+            {semData.map((topico) => (
+              <Linha key={topico.id} topico={topico} />
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
   )
 }
 
@@ -218,9 +348,10 @@ export default function QuadroKanban({
   tipo,
   participantes = [],
   movendo = false,
-  alterandoResponsavel = false,
+  visao = 'quadro',
+  detalhes = {},
+  onAbrirDetalhe,
   onMover,
-  onAlterarResponsavel,
 }) {
   const [arrastandoId, setArrastandoId] = useState(null)
   const [colunaSobre, setColunaSobre] = useState(null)
@@ -295,10 +426,32 @@ export default function QuadroKanban({
     )
   }
 
+  if (visao === 'lista') {
+    return (
+      <ListaTopicos
+        topicos={topicos}
+        colunas={colunas}
+        detalhes={detalhes}
+        onAbrirDetalhe={onAbrirDetalhe}
+      />
+    )
+  }
+
+  if (visao === 'cronograma') {
+    return (
+      <CronogramaTopicos
+        topicos={topicos}
+        colunas={colunas}
+        detalhes={detalhes}
+        onAbrirDetalhe={onAbrirDetalhe}
+      />
+    )
+  }
+
   return (
     <div
       ref={raizRef}
-      className="grid grid-cols-1 gap-3 pb-2 sm:grid-cols-2 xl:grid-cols-4"
+      className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 scroll-smooth"
     >
       {colunas.map((coluna, indice) => {
         const cards = topicosDaColuna(topicos, coluna.id, colunas)
@@ -316,10 +469,10 @@ export default function QuadroKanban({
             }}
             onDragLeave={(event) => handleDragLeave(event, coluna.id)}
             onDrop={(event) => handleDrop(event, coluna)}
-            className={`flex min-h-64 min-w-0 flex-col rounded-xl border transition-colors ${
+            className={`flex min-h-64 w-80 min-w-[280px] shrink-0 snap-start flex-col rounded-md border transition-colors ${
               sobre
-                ? 'border-brand bg-accent-soft ring-2 ring-brand/15'
-                : 'border-line-soft bg-surface-hover'
+                ? 'border-ink/30 bg-surface-hover'
+                : 'border-line bg-surface-muted'
             }`}
           >
             <header className="flex items-center justify-between gap-2 border-b border-line-soft px-3 py-2.5">
@@ -340,9 +493,9 @@ export default function QuadroKanban({
               </span>
             </header>
 
-            <ul className="flex flex-1 flex-col gap-2 p-2">
+            <ul className="flex flex-1 flex-col gap-2.5 p-2.5">
               {cards.length === 0 ? (
-                <li className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-ink-faint">
+                <li className="flex flex-1 items-center justify-center rounded-md border border-dashed border-line-faint px-3 py-8 text-center text-xs text-ink-faint">
                   {sobre ? 'Solte o card aqui' : 'Nenhum card'}
                 </li>
               ) : (
@@ -357,10 +510,10 @@ export default function QuadroKanban({
                       colunaConcluida={concluida}
                       arrastando={arrastandoId === topico.id}
                       movendo={movendo}
-                      alterandoResponsavel={alterandoResponsavel}
+                      detalhe={detalhes[topico.id]}
+                      onAbrir={onAbrirDetalhe}
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
-                      onAlterarResponsavel={onAlterarResponsavel}
                       onMover={(destinoId) =>
                         onMoverPeloSeletor(topico.id, destinoId)
                       }

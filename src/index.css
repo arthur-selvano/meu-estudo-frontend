@@ -29,115 +29,115 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 :root {
   color-scheme: light;
 
-  --page: #f4f6f0;
+  --page: #fafafa;
   --surface: #ffffff;
-  --surface-muted: #fafbf8;
-  --surface-hover: #eef2ea;
-  --surface-soft: #f0f4ec;
-  --surface-disabled: #f0f2ec;
+  --surface-muted: #fafafa;
+  --surface-hover: #f4f4f5;
+  --surface-soft: #f4f4f5;
+  --surface-disabled: #f4f4f5;
 
-  --ink: #12251d;
-  --ink-soft: #33473c;
-  --ink-secondary: #53655c;
-  --ink-muted: #6b7d71;
-  --ink-faint: #8a9a8f;
-  --ink-placeholder: #9aa79d;
+  --ink: #18181b;
+  --ink-soft: #3f3f46;
+  --ink-secondary: #52525b;
+  --ink-muted: #71717a;
+  --ink-faint: #a1a1aa;
+  --ink-placeholder: #a1a1aa;
 
-  --line: #cbd6c8;
-  --line-soft: #e1e8de;
-  --line-faint: #edf1ea;
-  --field-line: #cbd6c8;
+  --line: #e4e4e7;
+  --line-soft: #e4e4e7;
+  --line-faint: #f4f4f5;
+  --field-line: #d4d4d8;
 
-  --primary: #173d2e;
-  --primary-hover: #1f4d3a;
-  --on-primary: #f4f6f0;
-  --brand: #2f6f4e;
-  --link: #173d2e;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --on-primary: #ffffff;
+  --brand: #2563eb;
+  --link: #2563eb;
 
-  --accent-soft: #e3efe0;
-  --accent-line: #8fb08f;
-  --accent-ink: #173d2e;
+  --accent-soft: #eff6ff;
+  --accent-line: #bfdbfe;
+  --accent-ink: #1d4ed8;
 
-  --success-bg: #e3efe0;
-  --success-line: #b7d2b4;
-  --success-ink: #245b34;
-  --success-hover: #d2e4ce;
+  --success-bg: #ecfdf5;
+  --success-line: #a7f3d0;
+  --success-ink: #047857;
+  --success-hover: #d1fae5;
 
-  --warning-bg: #fbf3df;
-  --warning-line: #e7d3a2;
-  --warning-ink: #7a5312;
+  --warning-bg: #fffbeb;
+  --warning-line: #fde68a;
+  --warning-ink: #b45309;
 
-  --danger-bg: #fbede7;
-  --danger-line: #e3c4b5;
-  --danger-ink: #8a3b1e;
-  --danger-hover: #f3d9ce;
+  --danger-bg: #fef2f2;
+  --danger-line: #fecaca;
+  --danger-ink: #b91c1c;
+  --danger-hover: #fee2e2;
 
-  --neutral-bg: #f0f2ee;
-  --neutral-line: #d7dcd6;
-  --neutral-ink: #67746b;
+  --neutral-bg: #f4f4f5;
+  --neutral-line: #e4e4e7;
+  --neutral-ink: #71717a;
 
-  --info: #4e6fa8;
-  --amber: #c08a2e;
+  --info: #2563eb;
+  --amber: #d97706;
 
-  --inverse: #12251d;
-  --inverse-ink: #f4f6f0;
-  --inverse-soft: #e7ede2;
-  --inverse-muted: #c7d3c6;
-  --inverse-faint: #8fa392;
+  --inverse: #18181b;
+  --inverse-ink: #fafafa;
+  --inverse-soft: #e4e4e7;
+  --inverse-muted: #a1a1aa;
+  --inverse-faint: #71717a;
 }
 
 .dark {
   color-scheme: dark;
 
-  --page: #0e1512;
-  --surface: #161f1a;
-  --surface-muted: #1a2420;
-  --surface-hover: #202c26;
-  --surface-soft: #1e2a24;
-  --surface-disabled: #171f1b;
+  --page: #09090b;
+  --surface: #18181b;
+  --surface-muted: #131316;
+  --surface-hover: #27272a;
+  --surface-soft: #27272a;
+  --surface-disabled: #1f1f23;
 
-  --ink: #ecf2ed;
-  --ink-soft: #c6d2c9;
-  --ink-secondary: #a8b8ae;
-  --ink-muted: #93a39a;
-  --ink-faint: #809086;
-  --ink-placeholder: #7c8c82;
+  --ink: #fafafa;
+  --ink-soft: #d4d4d8;
+  --ink-secondary: #a1a1aa;
+  --ink-muted: #a1a1aa;
+  --ink-faint: #71717a;
+  --ink-placeholder: #71717a;
 
-  --line: #2b3a32;
-  --line-soft: #26332c;
-  --line-faint: #223028;
-  --field-line: #5f7066;
+  --line: #27272a;
+  --line-soft: #27272a;
+  --line-faint: #1f1f23;
+  --field-line: #3f3f46;
 
-  --primary: #2f6f4e;
-  --primary-hover: #3b8060;
-  --on-primary: #f4f6f0;
-  --brand: #6fb68c;
-  --link: #a3dbb9;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --on-primary: #ffffff;
+  --brand: #60a5fa;
+  --link: #93c5fd;
 
-  --accent-soft: #1d3528;
-  --accent-line: #3e7256;
-  --accent-ink: #c7e8d2;
+  --accent-soft: #172554;
+  --accent-line: #1e40af;
+  --accent-ink: #93c5fd;
 
-  --success-bg: #183225;
-  --success-line: #2e5741;
-  --success-ink: #97d8ac;
-  --success-hover: #21432f;
+  --success-bg: #052e16;
+  --success-line: #166534;
+  --success-ink: #86efac;
+  --success-hover: #14532d;
 
-  --warning-bg: #322713;
-  --warning-line: #6a5424;
-  --warning-ink: #e9c87e;
+  --warning-bg: #271d0a;
+  --warning-line: #78350f;
+  --warning-ink: #fcd34d;
 
-  --danger-bg: #35201a;
-  --danger-line: #6e3d2e;
-  --danger-ink: #f2a98e;
-  --danger-hover: #43281f;
+  --danger-bg: #2a1215;
+  --danger-line: #7f1d1d;
+  --danger-ink: #fca5a5;
+  --danger-hover: #3f1a1d;
 
-  --neutral-bg: #212a25;
-  --neutral-line: #38453d;
-  --neutral-ink: #a5b2a9;
+  --neutral-bg: #27272a;
+  --neutral-line: #3f3f46;
+  --neutral-ink: #a1a1aa;
 
-  --info: #83a5dd;
-  --amber: #d9a64b;
+  --info: #93c5fd;
+  --amber: #fbbf24;
 }
 
 @theme inline {

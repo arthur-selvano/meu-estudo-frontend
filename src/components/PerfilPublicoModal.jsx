@@ -137,7 +137,7 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
               <div className="min-w-0">
                 <h2
                   id="titulo-perfil-publico"
-                  className="break-words font-serif text-2xl leading-tight tracking-tight text-ink"
+                  className="break-words text-lg font-semibold leading-tight tracking-tight text-ink"
                 >
                   {perfil.nome}
                 </h2>

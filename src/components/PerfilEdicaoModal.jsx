@@ -60,7 +60,7 @@ function Secao({ id, titulo, descricao, children }) {
       aria-labelledby={id}
       className="border-t border-line-soft pt-5"
     >
-      <h3 id={id} className="font-serif text-lg">
+      <h3 id={id} className="text-sm font-semibold text-ink">
         {titulo}
       </h3>
       {descricao && <p className="mt-0.5 text-xs text-ink-muted">{descricao}</p>}
@@ -223,12 +223,12 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
         <div>
           <h2
             id="titulo-edicao-perfil"
-            className="font-serif text-2xl leading-tight tracking-tight"
+            className="text-lg font-semibold leading-tight"
           >
             Meu perfil
           </h2>
           <p className="mt-0.5 text-xs text-ink-muted">
-            Esses dados ficam visíveis para outros membros dos seus quadros.
+            Visível para membros dos seus quadros.
           </p>
         </div>
         <button
@@ -265,7 +265,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
       ) : (
         <form onSubmit={handleSalvar} className="px-4 py-5 sm:px-5">
           <div className="space-y-6">
-            <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line-soft bg-surface p-4">
+            <div className="flex flex-wrap items-center gap-4 rounded-lg border border-line-soft bg-surface p-4">
               <Avatar
                 nome={nome || perfil.nome}
                 fotoUrl={previewUrl ?? perfil.fotoUrl}
@@ -273,7 +273,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
               />
 
               <div className="min-w-0 flex-1">
-                <p className="break-words font-serif text-xl leading-tight">
+                <p className="break-words text-base font-semibold leading-tight">
                   {nome.trim() || perfil.nome}
                 </p>
                 <p className="mt-0.5 flex items-center gap-1.5 break-words text-xs text-ink-muted">
@@ -314,7 +314,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
                 </div>
 
                 <p className="mt-1.5 text-xs text-ink-muted">
-                  JPEG, PNG ou WebP, até 2 MB. A foto é salva junto com o perfil.
+                  JPEG, PNG ou WebP, até 2 MB.
                 </p>
               </div>
             </div>
@@ -325,11 +325,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
               onFechar={() => setErro('')}
             />
 
-            <Secao
-              id="secao-dados-pessoais"
-              titulo="Dados pessoais"
-              descricao="Seu nome e onde você estuda."
-            >
+            <Secao id="secao-dados-pessoais" titulo="Dados pessoais">
               <div>
                 <div className="mb-1 flex items-baseline justify-between gap-2">
                   <label htmlFor="perfil-nome" className={`${ROTULO} mb-0`}>
@@ -361,7 +357,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
                   className={CAMPO}
                 />
                 <p className="mt-1 text-xs text-ink-muted">
-                  O e-mail de acesso não pode ser alterado por aqui.
+                  O e-mail não pode ser alterado.
                 </p>
               </div>
 
@@ -412,11 +408,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
               </div>
             </Secao>
 
-            <Secao
-              id="secao-sobre"
-              titulo="Sobre você"
-              descricao="Um resumo do que você está estudando e dos seus objetivos."
-            >
+            <Secao id="secao-sobre" titulo="Sobre você">
               <div>
                 <div className="mb-1 flex items-baseline justify-between gap-2">
                   <label htmlFor="perfil-bio" className={`${ROTULO} mb-0`}>
@@ -440,7 +432,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
             <Secao
               id="secao-estudos"
               titulo="Interesses e colaboração"
-              descricao="Use até 10 tópicos em cada lista para encontrar pessoas com os mesmos interesses."
+              descricao="Até 10 tópicos por lista."
             >
               <SeletorTopicos
                 id="topicos-interesse"

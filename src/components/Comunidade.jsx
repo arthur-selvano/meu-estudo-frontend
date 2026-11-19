@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Loader2, RefreshCw } from 'lucide-react'
+import { Loader2, Plus, RefreshCw, Search } from 'lucide-react'
+import Avatar from './Avatar'
 import CardPublicacao from './CardPublicacao'
 import ComposerPublicacao from './ComposerPublicacao'
 import FeedbackBanner from './FeedbackBanner'
-import ListaMembros from './ListaMembros'
 import ModalConfirmacao from './ModalConfirmacao'
 import { useToast } from '../context/ToastContext'
 import { mensagemDeErro } from '../services/api'
@@ -14,7 +14,8 @@ import {
   excluirPublicacao,
   listarPublicacoes,
 } from '../services/publicacaoService'
-import { BOTAO_SECUNDARIO, CARTAO } from '../styles/ui'
+import { listarPerfisPublicos } from '../services/perfilService'
+import { BOTAO_PRIMARIO, BOTAO_SECUNDARIO, CAMPO_ICONE } from '../styles/ui'
 import { TIPOS_PUBLICACAO } from '../utils/publicacoes'
 
 const FILTROS = [
@@ -25,10 +26,25 @@ const FILTROS = [
   })),
 ]
 
+function correspondeAoTermo(perfil, termo) {
+  return [
+    perfil.nome,
+    perfil.cursoOuArea,
+    perfil.instituicao,
+    ...(perfil.topicosInteresse ?? []),
+    ...(perfil.topicosAjuda ?? []),
+  ]
+    .filter(Boolean)
+    .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termo))
+}
+
 export default function Comunidade({ usuario, onVerPerfil }) {
   const { mostrarSucesso, mostrarErro } = useToast()
   const [publicacoes, setPublicacoes] = useState([])
+  const [membros, setMembros] = useState([])
   const [filtro, setFiltro] = useState('TODOS')
+  const [busca, setBusca] = useState('')
+  const [composerAberto, setComposerAberto] = useState(false)
   const [carregando, setCarregando] = useState(true)
   const [erro, setErro] = useState('')
   const [acao, setAcao] = useState('')
@@ -54,6 +70,20 @@ export default function Comunidade({ usuario, onVerPerfil }) {
       ativo = false
     }
   }, [tentativa])
+
+  useEffect(() => {
+    let ativo = true
+
+    listarPerfisPublicos()
+      .then((dados) => {
+        if (ativo) setMembros(dados)
+      })
+      .catch(() => {})
+
+    return () => {
+      ativo = false
+    }
+  }, [])
 
   function tentarNovamente() {
     setCarregando(true)
@@ -88,6 +118,7 @@ export default function Comunidade({ usuario, onVerPerfil }) {
 
       setPublicacoes((atuais) => [nova, ...atuais])
       setFiltro('TODOS')
+      setComposerAberto(false)
       mostrarSucesso('Publicação criada.')
       return true
     })
@@ -129,137 +160,187 @@ export default function Comunidade({ usuario, onVerPerfil }) {
     })
   }
 
-  const visiveis =
+  const termo = busca.trim().toLocaleLowerCase('pt-BR')
+
+  const visiveis = (
     filtro === 'TODOS'
       ? publicacoes
       : publicacoes.filter((publicacao) => publicacao.tipo === filtro)
+  ).filter(
+    (publicacao) =>
+      !termo ||
+      [publicacao.titulo, publicacao.conteudo, publicacao.autorNome]
+        .filter(Boolean)
+        .some((valor) => valor.toLocaleLowerCase('pt-BR').includes(termo)),
+  )
+
+  const membrosFiltrados = termo
+    ? membros.filter((membro) => correspondeAoTermo(membro, termo)).slice(0, 5)
+    : []
 
   const detalheExclusao = publicacaoParaExcluir
     ? publicacaoParaExcluir.titulo || publicacaoParaExcluir.conteudo
     : ''
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-[minmax(0,1fr)_19rem]">
-      <div className="min-w-0 space-y-4">
+    <div className="mx-auto w-full max-w-3xl space-y-4">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <button
+          type="button"
+          onClick={() => setComposerAberto((aberto) => !aberto)}
+          className={`${BOTAO_PRIMARIO} h-9 shrink-0 px-3 text-sm`}
+        >
+          <Plus aria-hidden="true" size={15} />
+          {composerAberto ? 'Fechar' : 'Nova publicação'}
+        </button>
+
+        <div className="relative min-w-0 flex-1">
+          <Search
+            aria-hidden="true"
+            size={15}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
+          />
+          <label htmlFor="busca-comunidade" className="sr-only">
+            Buscar publicações ou membros
+          </label>
+          <input
+            id="busca-comunidade"
+            type="search"
+            value={busca}
+            onChange={(event) => setBusca(event.target.value)}
+            placeholder="Buscar publicações ou membros"
+            className={`${CAMPO_ICONE} py-2 text-sm`}
+          />
+
+          {membrosFiltrados.length > 0 && (
+            <ul className="absolute inset-x-0 top-full z-30 mt-1 overflow-hidden rounded-lg border border-line bg-surface p-1">
+              {membrosFiltrados.map((membro) => {
+                const doAutor = publicacoes.filter(
+                  (publicacao) => publicacao.autorId === membro.id,
+                )
+                const interacoes = doAutor.reduce(
+                  (total, publicacao) =>
+                    total +
+                    (publicacao.curtidas ?? 0) +
+                    (publicacao.comentarios?.length ?? 0),
+                  0,
+                )
+
+                return (
+                  <li key={membro.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBusca('')
+                        onVerPerfil(membro.id)
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
+                    >
+                      <Avatar
+                        nome={membro.nome}
+                        fotoUrl={membro.fotoUrl}
+                        tamanho="sm"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-medium text-ink">
+                          {membro.nome}
+                        </span>
+                        <span className="block truncate text-xs text-ink-muted">
+                          {doAutor.length}{' '}
+                          {doAutor.length === 1 ? 'publicação' : 'publicações'} ·{' '}
+                          {interacoes}{' '}
+                          {interacoes === 1 ? 'interação' : 'interações'}
+                        </span>
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {composerAberto && (
         <ComposerPublicacao
           usuario={usuario}
           publicando={acao === 'publicar'}
           onPublicar={handlePublicar}
         />
+      )}
 
-        <section className={`${CARTAO} min-w-0 p-4 sm:p-5`}>
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-serif text-xl">Feed da comunidade</h2>
-            <p className="text-xs text-ink-muted">
-              {visiveis.length}{' '}
-              {visiveis.length === 1 ? 'publicação' : 'publicações'}
-            </p>
-          </div>
+      <div className="flex flex-wrap gap-1.5">
+        {FILTROS.map((opcao) => {
+          const ativo = filtro === opcao.valor
 
-          <div
-            role="group"
-            aria-label="Filtrar publicações"
-            className="mt-3 flex flex-wrap gap-1.5"
-          >
-            {FILTROS.map((opcao) => {
-              const ativo = filtro === opcao.valor
-
-              return (
-                <button
-                  key={opcao.valor}
-                  type="button"
-                  onClick={() => setFiltro(opcao.valor)}
-                  aria-pressed={ativo}
-                  className={`min-h-8 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25 ${
-                    ativo
-                      ? 'border-accent-line bg-accent-soft text-accent-ink'
-                      : 'border-field-line bg-surface text-ink-soft hover:bg-surface-hover'
-                  }`}
-                >
-                  {opcao.rotulo}
-                </button>
-              )
-            })}
-          </div>
-
-          <div className="mt-4">
-            {carregando ? (
-              <div className="flex min-h-40 items-center justify-center">
-                <Loader2
-                  aria-hidden="true"
-                  size={24}
-                  className="motion-safe:animate-spin text-brand"
-                />
-                <span className="sr-only">Carregando feed</span>
-              </div>
-            ) : erro ? (
-              <div className="space-y-3">
-                <FeedbackBanner tipo="erro" mensagem={erro} />
-                <button
-                  type="button"
-                  onClick={tentarNovamente}
-                  className={`${BOTAO_SECUNDARIO} px-3.5 py-2 text-sm`}
-                >
-                  <RefreshCw aria-hidden="true" size={15} />
-                  Tentar novamente
-                </button>
-              </div>
-            ) : visiveis.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-line bg-surface/60 px-4 py-10 text-center">
-                <p className="font-serif text-lg">Nada por aqui ainda</p>
-                <p className="mx-auto mt-1 max-w-sm text-sm text-ink-muted">
-                  {filtro === 'TODOS'
-                    ? 'Seja o primeiro a publicar um pedido de estudo, uma aula, link ou documento.'
-                    : 'Nenhuma publicação deste tipo por enquanto. Experimente outro filtro.'}
-                </p>
-              </div>
-            ) : (
-              <ul className="space-y-3">
-                {visiveis.map((publicacao) => (
-                  <li key={publicacao.id}>
-                    <CardPublicacao
-                      publicacao={publicacao}
-                      usuario={usuario}
-                      curtindo={acao === `curtir:${publicacao.id}`}
-                      comentando={acao === `comentar:${publicacao.id}`}
-                      onCurtir={handleCurtir}
-                      onComentar={handleComentar}
-                      onSolicitarExclusao={setPublicacaoParaExcluir}
-                      onVerPerfil={onVerPerfil}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </section>
+          return (
+            <button
+              key={opcao.valor}
+              type="button"
+              onClick={() => setFiltro(opcao.valor)}
+              aria-pressed={ativo}
+              className={`min-h-8 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 ${
+                ativo
+                  ? 'border-field-line bg-surface-hover text-ink'
+                  : 'border-line bg-surface text-ink-soft hover:bg-surface-hover'
+              }`}
+            >
+              {opcao.rotulo}
+            </button>
+          )
+        })}
       </div>
 
-      <aside className="min-w-0 space-y-4">
-        <ListaMembros usuarioId={usuario.id} onVerPerfil={onVerPerfil} />
-
-        <section className={`${CARTAO} p-4`}>
-          <h2 className="font-serif text-lg">Como participar</h2>
-          <ul className="mt-2 space-y-2 text-xs leading-relaxed text-ink-muted">
-            <li>
-              <strong className="text-ink-soft">Pedido de estudo:</strong>{' '}
-              encontre alguém para estudar junto.
+      {carregando ? (
+        <div className="flex min-h-40 items-center justify-center">
+          <Loader2
+            aria-hidden="true"
+            size={24}
+            className="motion-safe:animate-spin text-brand"
+          />
+          <span className="sr-only">Carregando feed</span>
+        </div>
+      ) : erro ? (
+        <div className="space-y-3">
+          <FeedbackBanner tipo="erro" mensagem={erro} />
+          <button
+            type="button"
+            onClick={tentarNovamente}
+            className={`${BOTAO_SECUNDARIO} px-3.5 py-2 text-sm`}
+          >
+            <RefreshCw aria-hidden="true" size={15} />
+            Tentar novamente
+          </button>
+        </div>
+      ) : visiveis.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-line px-4 py-8">
+          <p className="text-sm font-medium text-ink">Nenhuma publicação.</p>
+          <p className="mt-1 text-sm text-ink-muted">
+            {termo
+              ? 'Ajuste a busca ou o filtro.'
+              : filtro === 'TODOS'
+                ? 'Publique um pedido de estudo, aula, link ou documento.'
+                : 'Nenhuma publicação deste tipo.'}
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {visiveis.map((publicacao) => (
+            <li key={publicacao.id}>
+              <CardPublicacao
+                publicacao={publicacao}
+                usuario={usuario}
+                curtindo={acao === `curtir:${publicacao.id}`}
+                comentando={acao === `comentar:${publicacao.id}`}
+                onCurtir={handleCurtir}
+                onComentar={handleComentar}
+                onSolicitarExclusao={setPublicacaoParaExcluir}
+                onVerPerfil={onVerPerfil}
+              />
             </li>
-            <li>
-              <strong className="text-ink-soft">Aula:</strong> compartilhe uma
-              explicação ou material de aula.
-            </li>
-            <li>
-              <strong className="text-ink-soft">Link:</strong> indique um
-              conteúdo externo útil.
-            </li>
-            <li>
-              <strong className="text-ink-soft">Documento:</strong> disponibilize
-              um arquivo para a comunidade.
-            </li>
-          </ul>
-        </section>
-      </aside>
+          ))}
+        </ul>
+      )}
 
       {publicacaoParaExcluir && (
         <ModalConfirmacao

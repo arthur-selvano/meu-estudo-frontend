@@ -31,11 +31,11 @@ export default function ModalConfirmacao({
           <div className="min-w-0">
             <h2
               id="titulo-modal-confirmacao"
-              className="break-words font-serif text-xl leading-tight tracking-tight"
+              className="break-words text-base font-semibold leading-tight"
             >
               {titulo}
             </h2>
-            <p className="mt-1 break-words text-sm leading-relaxed text-ink-secondary">
+            <p className="mt-1 break-words text-sm leading-normal text-ink-secondary">
               {mensagem}
             </p>
           </div>

@@ -81,7 +81,7 @@ export default function SeletorTopicos({
             onClick={() => alternar(topico)}
             aria-pressed="true"
             aria-label={`Remover ${topico}`}
-            className="inline-flex items-center gap-1 rounded-full border border-accent-line bg-accent-soft px-2.5 py-1 text-xs font-medium text-accent-ink transition-colors hover:bg-success-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25"
+            className="inline-flex items-center gap-1 rounded-full border border-ink/20 bg-surface-hover px-2.5 py-1 text-xs font-medium text-ink transition-colors hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
           >
             {topico}
             <X aria-hidden="true" size={12} />
@@ -121,7 +121,7 @@ export default function SeletorTopicos({
           type="button"
           onClick={adicionar}
           disabled={noLimite || desabilitado || !novoTopico.trim()}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg border border-field-line px-3 py-2 text-xs font-semibold text-link transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border border-field-line px-3 py-2 text-xs font-medium text-ink-soft transition-colors hover:bg-surface-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus aria-hidden="true" size={14} />
           Adicionar

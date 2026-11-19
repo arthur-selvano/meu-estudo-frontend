@@ -44,7 +44,7 @@ export default function Avatar({
     <span
       role="img"
       aria-label={`Foto de ${nome}`}
-      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-on-primary ${dimensao} ${className}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full border border-line bg-surface-hover font-medium text-ink-soft ${dimensao} ${className}`}
     >
       {iniciais(nome)}
     </span>

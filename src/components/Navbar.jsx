@@ -1,81 +1,39 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  ChevronDown,
-  GraduationCap,
-  LogOut,
-  Plus,
-  UserRound,
-} from 'lucide-react'
+import { ChevronDown, GraduationCap, LogOut, UserRound } from 'lucide-react'
 import Avatar from './Avatar'
 import BotaoTema from './BotaoTema'
-import { BOTAO_PRIMARIO } from '../styles/ui'
 
-function LinkSecao({ secao, rotulo, ativo, pendentes, onIrParaSecao }) {
-  function handleClick() {
-    onIrParaSecao(secao)
-    requestAnimationFrame(() =>
-      document.getElementById(secao)?.focus({ preventScroll: true }),
-    )
-  }
+const PAGINAS = [
+  { valor: 'quadro', rotulo: 'Quadro' },
+  { valor: 'comunidade', rotulo: 'Comunidade' },
+  { valor: 'convite', rotulo: 'Convite' },
+]
 
-  return (
-    <a
-      href={`#${secao}`}
-      onClick={handleClick}
-      aria-current={ativo ? 'true' : undefined}
-      className={`inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25 ${
-        ativo
-          ? 'bg-accent-soft text-accent-ink'
-          : 'text-ink-secondary hover:bg-surface-hover hover:text-ink'
-      }`}
-    >
-      {rotulo}
-      {secao === 'convites' && pendentes > 0 && (
-        <>
-          <span
-            aria-hidden="true"
-            className="rounded-full bg-surface-soft px-1.5 text-[11px] font-semibold text-ink-muted"
-          >
-            {pendentes}
-          </span>
-          <span className="sr-only">, {pendentes} pendentes</span>
-        </>
-      )}
-    </a>
-  )
-}
-
-function Navegacao({
-  className,
-  secaoAtiva,
-  convitesPendentes,
-  onIrParaSecao,
-}) {
+function Navegacao({ className, paginaAtiva, onNavegar }) {
   return (
     <nav
       aria-label="Navegação principal"
       className={`items-center gap-1 ${className}`}
     >
-      <LinkSecao
-        secao="quadros"
-        rotulo="Quadros"
-        ativo={secaoAtiva === 'quadros'}
-        pendentes={convitesPendentes}
-        onIrParaSecao={onIrParaSecao}
-      />
-      <LinkSecao
-        secao="comunidade"
-        rotulo="Comunidade"
-        ativo={secaoAtiva === 'comunidade'}
-        onIrParaSecao={onIrParaSecao}
-      />
-      <LinkSecao
-        secao="convites"
-        rotulo="Convites"
-        ativo={secaoAtiva === 'convites'}
-        pendentes={convitesPendentes}
-        onIrParaSecao={onIrParaSecao}
-      />
+      {PAGINAS.map((pagina) => {
+        const ativo = paginaAtiva === pagina.valor
+
+        return (
+          <button
+            key={pagina.valor}
+            type="button"
+            onClick={() => onNavegar(pagina.valor)}
+            aria-current={ativo ? 'page' : undefined}
+            className={`inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25 ${
+              ativo
+                ? 'bg-surface-hover text-ink'
+                : 'text-ink-secondary hover:bg-surface-hover hover:text-ink'
+            }`}
+          >
+            {pagina.rotulo}
+          </button>
+        )
+      })}
     </nav>
   )
 }
@@ -140,7 +98,7 @@ function MenuUsuario({ usuario, onSair, onAbrirPerfil }) {
         <div
           ref={painelRef}
           id="menu-usuario"
-          className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-line bg-surface p-1.5 shadow-lg"
+          className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border border-line bg-surface p-1.5"
         >
           <div className="mb-1 border-b border-line-faint px-2.5 py-2">
             <p className="truncate text-sm font-medium text-ink">
@@ -180,11 +138,9 @@ function MenuUsuario({ usuario, onSair, onAbrirPerfil }) {
 
 export default function Navbar({
   usuario,
-  convitesPendentes = 0,
-  secaoAtiva = null,
+  paginaAtiva = 'quadro',
   carregando = false,
-  onIrParaSecao = () => {},
-  onNovoQuadro = () => {},
+  onNavegar = () => {},
   onSair,
   onAbrirPerfil,
 }) {
@@ -193,39 +149,27 @@ export default function Navbar({
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex min-h-14 items-center justify-between gap-3 md:min-h-16">
           <a href="#topo" className="inline-flex min-h-11 items-center gap-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary">
+            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-ink text-surface">
               <GraduationCap
                 aria-hidden="true"
                 size={18}
                 strokeWidth={1.8}
               />
             </span>
-            <span className="font-serif text-xl tracking-tight text-ink">
-              MeuEstudos
+            <span className="text-base font-semibold tracking-tight text-ink">
+              Meu Estudo
             </span>
           </a>
 
           {!carregando && (
             <Navegacao
               className="hidden md:flex"
-              secaoAtiva={secaoAtiva}
-              convitesPendentes={convitesPendentes}
-              onIrParaSecao={onIrParaSecao}
+              paginaAtiva={paginaAtiva}
+              onNavegar={onNavegar}
             />
           )}
 
           <div className="flex items-center gap-1.5">
-            {!carregando && (
-              <button
-                type="button"
-                onClick={onNovoQuadro}
-                className={`${BOTAO_PRIMARIO} hidden min-h-11 px-3 py-2 text-sm md:inline-flex`}
-              >
-                <Plus aria-hidden="true" size={16} />
-                Novo quadro
-              </button>
-            )}
-
             <BotaoTema />
 
             <MenuUsuario
@@ -237,22 +181,12 @@ export default function Navbar({
         </div>
 
         {!carregando && (
-          <div className="flex items-center justify-between gap-2 border-t border-line-faint py-1.5 md:hidden">
+          <div className="flex justify-center border-t border-line-faint py-1.5 md:hidden">
             <Navegacao
               className="flex"
-              secaoAtiva={secaoAtiva}
-              convitesPendentes={convitesPendentes}
-              onIrParaSecao={onIrParaSecao}
+              paginaAtiva={paginaAtiva}
+              onNavegar={onNavegar}
             />
-
-            <button
-              type="button"
-              onClick={onNovoQuadro}
-              aria-label="Novo quadro"
-              className={`${BOTAO_PRIMARIO} min-h-11 min-w-11 px-2 py-2`}
-            >
-              <Plus aria-hidden="true" size={16} />
-            </button>
           </div>
         )}
       </div>
