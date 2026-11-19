@@ -112,7 +112,7 @@ export default function DetalheGrupo({
 
   return (
     <div className="space-y-5">
-      <section className={`${CARTAO} p-5 sm:p-6`}>
+      <section className={`${CARTAO} p-4 sm:p-5`}>
         <span
           className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
             pessoal
@@ -128,17 +128,17 @@ export default function DetalheGrupo({
           {pessoal ? 'Organização pessoal' : 'Trabalho acadêmico'}
         </span>
 
-        <h2 className="mt-2 font-serif text-3xl leading-tight tracking-tight text-[#12251D]">
+        <h2 className="mt-2 break-words font-serif text-2xl leading-tight tracking-tight text-[#12251D] sm:text-3xl">
           {grupo.titulo}
         </h2>
 
         {grupo.descricao && (
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[#53655C]">
+          <p className="mt-2 max-w-2xl break-words text-sm leading-relaxed text-[#53655C]">
             {grupo.descricao}
           </p>
         )}
 
-        <p className="mt-3 text-sm text-[#53655C]">
+        <p className="mt-3 break-words text-sm text-[#53655C]">
           Dono:{' '}
           {souDono ? (
             <span className="font-medium text-[#12251D]">você</span>
@@ -170,13 +170,13 @@ export default function DetalheGrupo({
                 {grupo.membros.map((membro) => (
                   <li
                     key={membro.usuarioId}
-                    className="flex items-center gap-2 rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] px-3 py-1.5"
+                    className="flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] px-3 py-1.5"
                   >
                     <button
                       type="button"
                       onClick={() => onVerPerfil(membro.usuarioId)}
                       aria-label={`Ver perfil de ${membro.nome}`}
-                      className="rounded-sm text-sm text-[#33473C] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6F4E]/40"
+                      className="break-words rounded-sm text-left text-sm text-[#33473C] underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2F6F4E]/40"
                     >
                       {membro.nome}
                     </button>
@@ -190,8 +190,8 @@ export default function DetalheGrupo({
       </section>
 
       {souDono && !pessoal && (
-        <section className={`${CARTAO} p-5`}>
-          <h3 className="font-serif text-xl">Convidar membro</h3>
+        <section className={`${CARTAO} p-4 sm:p-5`}>
+          <h3 className="font-serif text-lg sm:text-xl">Convidar membro</h3>
           <p className="mt-1 text-xs text-[#6B7D71]">
             A pessoa precisa já ter uma conta no MeuEstudos.
           </p>
@@ -200,7 +200,7 @@ export default function DetalheGrupo({
             onSubmit={handleConvidar}
             className="mt-3 flex flex-col gap-2 sm:flex-row"
           >
-            <div className="relative flex-1">
+            <div className="relative min-w-0 flex-1">
               <Mail
                 aria-hidden="true"
                 size={16}
@@ -225,7 +225,7 @@ export default function DetalheGrupo({
             <button
               type="submit"
               disabled={convidando || !email.trim()}
-              className={`${BOTAO_PRIMARIO} px-4 py-2.5 text-sm`}
+              className={`${BOTAO_PRIMARIO} min-h-11 px-4 py-2.5 text-sm`}
             >
               {convidando && (
                 <Loader2
@@ -240,11 +240,13 @@ export default function DetalheGrupo({
         </section>
       )}
 
-      <section className={`${CARTAO} p-5`}>
+      <section className={`${CARTAO} p-4 sm:p-5`}>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h3 className="font-serif text-xl">Quadro de tarefas</h3>
-          <p className="text-xs text-[#6B7D71]">
-            Arraste os cards entre as colunas.
+          <h3 className="min-w-0 font-serif text-lg sm:text-xl">
+            Quadro de tarefas
+          </h3>
+          <p className="break-words text-xs text-[#6B7D71]">
+            Arraste os cards ou use “Mover para…”.
           </p>
         </div>
 
@@ -311,7 +313,7 @@ export default function DetalheGrupo({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div>
+            <div className="min-w-0">
               <label htmlFor="topico-data" className={ROTULO}>
                 Prazo (opcional)
               </label>
@@ -333,7 +335,7 @@ export default function DetalheGrupo({
               </div>
             </div>
 
-            <div>
+            <div className="min-w-0">
               <label htmlFor="topico-prioridade" className={ROTULO}>
                 Prioridade
               </label>
@@ -354,7 +356,7 @@ export default function DetalheGrupo({
             </div>
 
             {tipo === TIPO_TRABALHO_ACADEMICO && (
-              <div className="sm:col-span-2">
+              <div className="min-w-0 sm:col-span-2">
                 <label htmlFor="topico-responsavel" className={ROTULO}>
                   Responsável (opcional)
                 </label>
@@ -389,7 +391,7 @@ export default function DetalheGrupo({
           <button
             type="submit"
             disabled={criandoTopico || !titulo.trim()}
-            className={`${BOTAO_PRIMARIO} w-full px-4 py-2.5 text-sm sm:w-auto`}
+            className={`${BOTAO_PRIMARIO} min-h-11 w-full px-4 py-2.5 text-sm sm:w-auto`}
           >
             {criandoTopico ? (
               <Loader2
@@ -404,7 +406,7 @@ export default function DetalheGrupo({
           </button>
         </form>
 
-        <div className="mt-5">
+        <div className="mt-5 min-w-0">
           <QuadroKanban
             topicos={grupo.topicos}
             colunas={colunas}

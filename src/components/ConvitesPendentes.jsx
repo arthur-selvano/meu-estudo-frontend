@@ -4,7 +4,7 @@ import { formatarDataHora } from '../utils/datas'
 
 export default function ConvitesPendentes({ convites, respondendo, onResponder }) {
   return (
-    <section className={`${CARTAO} p-4`}>
+    <section className={`${CARTAO} min-w-0 p-4`}>
       <h2 className="font-serif text-lg">Convites pendentes</h2>
 
       {convites.length === 0 ? (
@@ -16,8 +16,10 @@ export default function ConvitesPendentes({ convites, respondendo, onResponder }
               key={convite.grupoId}
               className="rounded-lg border border-[#E1E8DE] bg-[#FAFBF8] p-3"
             >
-              <p className="font-medium text-[#12251D]">{convite.grupoTitulo}</p>
-              <p className="mt-0.5 text-xs text-[#53655C]">
+              <p className="break-words font-medium text-[#12251D]">
+                {convite.grupoTitulo}
+              </p>
+              <p className="mt-0.5 break-words text-xs text-[#53655C]">
                 Convite de {convite.donoNome}
               </p>
               <p className="mt-1 flex items-center gap-1.5 text-xs text-[#6B7D71]">
@@ -30,7 +32,7 @@ export default function ConvitesPendentes({ convites, respondendo, onResponder }
                   type="button"
                   onClick={() => onResponder(convite.grupoId, true)}
                   disabled={respondendo}
-                  className={`${BOTAO_PRIMARIO} flex-1 px-3 py-2 text-xs`}
+                  className={`${BOTAO_PRIMARIO} min-h-11 flex-1 px-3 py-2 text-xs`}
                 >
                   Aceitar
                 </button>
@@ -38,7 +40,7 @@ export default function ConvitesPendentes({ convites, respondendo, onResponder }
                   type="button"
                   onClick={() => onResponder(convite.grupoId, false)}
                   disabled={respondendo}
-                  className={`${BOTAO_SECUNDARIO} flex-1 px-3 py-2 text-xs`}
+                  className={`${BOTAO_SECUNDARIO} min-h-11 flex-1 px-3 py-2 text-xs`}
                 >
                   Recusar
                 </button>

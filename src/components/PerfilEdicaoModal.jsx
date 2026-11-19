@@ -144,7 +144,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
       bloqueado={salvando}
       className="max-w-2xl"
     >
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-[#E1E8DE] bg-[#F9FAF6] px-5 py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-[#E1E8DE] bg-[#F9FAF6] px-4 py-4 sm:px-5">
           <div>
             <h2
               id="titulo-edicao-perfil"
@@ -161,7 +161,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
             onClick={onFechar}
             disabled={salvando}
             aria-label="Fechar edição de perfil"
-            className="rounded-lg p-1.5 text-[#53655C] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 disabled:opacity-50"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-[#53655C] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 disabled:opacity-50"
           >
             <X aria-hidden="true" size={18} />
           </button>
@@ -177,7 +177,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
             <span className="sr-only">Carregando perfil</span>
           </div>
         ) : !perfil ? (
-          <div className="space-y-4 px-5 py-6">
+          <div className="space-y-4 px-4 py-6 sm:px-5">
             <FeedbackBanner tipo="erro" mensagem={erro} />
             <button
               type="button"
@@ -188,7 +188,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSalvar} className="space-y-5 px-5 py-5">
+          <form onSubmit={handleSalvar} className="space-y-5 px-4 py-5 sm:px-5">
             <div className="flex flex-wrap items-center gap-4">
               <Avatar
                 nome={nome}
@@ -256,7 +256,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
-              <div>
+              <div className="min-w-0">
                 <label htmlFor="perfil-curso" className={ROTULO}>
                   Curso ou área
                 </label>
@@ -272,7 +272,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
                 />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <label htmlFor="perfil-instituicao" className={ROTULO}>
                   Instituição
                 </label>
@@ -309,12 +309,12 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
 
             <FeedbackBanner tipo="erro" mensagem={erro} />
 
-            <div className="flex flex-wrap justify-end gap-2 border-t border-[#E1E8DE] pt-4">
+            <div className="flex flex-col-reverse gap-2 border-t border-[#E1E8DE] pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={onFechar}
                 disabled={salvando}
-                className={`${BOTAO_SECUNDARIO} px-4 py-2.5 text-sm`}
+                className={`${BOTAO_SECUNDARIO} min-h-11 w-full px-4 py-2.5 text-sm sm:w-auto`}
               >
                 Cancelar
               </button>
@@ -322,7 +322,7 @@ export default function PerfilEdicaoModal({ onFechar, onSalvo }) {
                 type="submit"
                 disabled={salvando}
                 aria-busy={salvando}
-                className={`${BOTAO_PRIMARIO} px-4 py-2.5 text-sm`}
+                className={`${BOTAO_PRIMARIO} min-h-11 w-full px-4 py-2.5 text-sm sm:w-auto`}
               >
                 {salvando && (
                   <Loader2

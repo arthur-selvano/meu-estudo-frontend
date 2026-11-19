@@ -1,44 +1,153 @@
 # MeuEstudos — Frontend
 
-Aplicação React para organizar grupos de estudo, convites e tópicos, integrada à
-API .NET **MeuEstudos**.
+Aplicação web (SPA) para organizar grupos de estudo: quadros Kanban colaborativos,
+convites por e-mail, rotina de tópicos, perfis públicos e atualizações em tempo real.
 
-O fluxo cobre autenticação JWT, convites pendentes, criação e seleção de grupos,
-lista de membros com status, convite por e-mail (somente o dono) e um checklist
-interativo de tópicos de estudo.
+Este repositório contém apenas o frontend. A API é o projeto .NET **MeuEstudos**,
+mantido no repositório irmão `../meu-estudos-backend`.
 
-## Stack
+## Sumário
 
-- React 19 (JavaScript puro, sem TypeScript)
-- Vite 8
-- Tailwind CSS v4
-- axios
-- lucide-react
-- oxlint
+- [Sobre o projeto](#sobre-o-projeto)
+- [Funcionalidades](#funcionalidades)
+- [Stack](#stack)
+- [Arquitetura](#arquitetura)
+- [Pré-requisitos](#pré-requisitos)
+- [Como rodar](#como-rodar)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Scripts](#scripts)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Contrato da API](#contrato-da-api)
+- [Modelo de dados](#modelo-de-dados)
+- [Sessão, permissões e regras](#sessão-permissões-e-regras)
+- [Testes](#testes)
+- [Limitações conhecidas](#limitações-conhecidas)
+- [Problemas comuns](#problemas-comuns)
+
+## Sobre o projeto
+
+O MeuEstudos ajuda estudantes a organizar o que precisam estudar e a dividir
+trabalhos em grupo. Cada usuário pode criar quadros de dois tipos:
+
+- **Organização pessoal** (`PESSOAL`): rotinas e tarefas próprias, sem convites
+  nem atribuição de responsáveis.
+- **Trabalho escolar/universitário** (`TRABALHO_ACADEMICO`): quadro
+  compartilhado com membros convidados, divisão de responsabilidades e status
+  de cada convite.
+
+O fluxo principal é: entrar ou criar conta → ver convites pendentes e quadros →
+criar um quadro → adicionar cards nas colunas → mover cards, definir
+responsáveis e acompanhar prazos. Tudo em português e com layout responsivo.
 
 ## Funcionalidades
 
-- **Autenticação:** login e cadastro com JWT, sessão persistida no `localStorage`.
-- **Dashboard:** convites pendentes, meus grupos e criação rápida de grupo.
-- **Detalhe do grupo:** título, descrição, dono e membros com status
-  `Aceito`, `Pendente` ou `Recusado`.
-- **Convite por e-mail:** exibido apenas para o dono; a API também bloqueia
-  não-donos.
-- **Rotina de estudos:** criação de tópicos com descrição e data prevista, e
-  conclusão/desconclusão por qualquer membro aceito.
-- **UX:** loading por ação, banners de erro/sucesso e layout responsivo.
-- **Privacidade:** o dono vê todos os status; os demais membros veem apenas
-  membros com convite aceito.
+### Autenticação e sessão
+
+- Login e cadastro com JWT.
+- Sessão persistida no `localStorage` (`token` e `usuario`).
+- Logout pelo cabeçalho; respostas `401` limpam a sessão automaticamente.
+
+### Dashboard
+
+- Convites pendentes com ações de aceitar ou recusar.
+- Lista de quadros do usuário e seleção do quadro ativo.
+- Criação de quadro com título, descrição e tipo.
+- Estados de carregamento por ação e banners de sucesso/erro.
+
+### Quadro Kanban
+
+- Colunas vindas da API (`A Fazer`, `Em Andamento`, `Revisão` e `Concluído`
+  nos quadros padrão), com fallback visual quando a API não as devolve.
+- Criação de cards com título, descrição, data prevista, prioridade
+  (`Baixa`, `Média`, `Alta`) e, em quadros acadêmicos, responsável.
+- Movimentação por **drag-and-drop** e também por um seletor
+  **"Mover para…"**, que serve de alternativa em telas touch e para navegação
+  por teclado.
+- Prazos vencidos destacados (exceto na coluna final); cards na última coluna
+  aparecem como concluídos.
+- Atualizações otimistas ao mover um card ou trocar o responsável, com
+  reversão automática em caso de erro na API.
+
+### Convites e membros
+
+- Convite por e-mail, disponível apenas para o dono de quadros acadêmicos.
+- A pessoa convidada aceita ou recusa o convite pelo dashboard.
+- Status possíveis: `Aceito`, `Pendente` e `Recusado`.
+- O dono vê todos os status; os demais membros veem apenas convidados que já
+  aceitaram.
+- O dono e os membros aceitos aparecem como possíveis responsáveis pelos cards.
+
+### Perfil
+
+- Edição de nome, bio, curso/área e instituição.
+- Upload de foto (JPEG, PNG ou WebP, até 2 MB) com atualização imediata do
+  avatar no cabeçalho.
+- Tópicos **"Quero estudar"** e **"Posso ajudar"**: catálogo sugerido com
+  possibilidade de texto livre, até 10 tópicos por lista e 40 caracteres por
+  tópico.
+- Perfil público acessível pelos nomes do dono e dos membros, sem expor e-mail.
+
+### Tempo real
+
+- Conexão com o hub SignalR `/hubs/quadro` usando o JWT da sessão.
+- O evento `TopicoAtualizado` mantém o quadro sincronizado entre os membros.
+- Falhas de conexão são silenciosas: as ações normais continuam funcionando.
+- Reconexão automática com nova carga dos dados para recuperar eventos perdidos.
+
+### Experiência de uso e acessibilidade
+
+- Layout mobile-first e responsivo.
+- Modais baseados no `<dialog>` nativo (foco preso, `Esc` e restauração de foco).
+- Rótulos ARIA, áreas `sr-only` e foco visível nos controles principais.
+- Datas formatadas em pt-BR, sem deslocamento de fuso em campos `DateOnly`.
+
+## Stack
+
+| Camada       | Tecnologia                          |
+| ------------ | ----------------------------------- |
+| UI           | React 19 (JavaScript, sem TypeScript) |
+| Build        | Vite 8                              |
+| Estilos      | Tailwind CSS 4 (`@tailwindcss/vite`) |
+| HTTP         | axios                               |
+| Tempo real   | `@microsoft/signalr`                |
+| Ícones       | lucide-react                        |
+| Lint         | oxlint                              |
+| Testes       | runner nativo do Node (`node:test`) |
+
+## Arquitetura
+
+```text
+App
+└── AuthProvider              sessão global (usuario, token, login, logout)
+    └── AuthPage              login e cadastro, quando não há sessão
+    └── Dashboard             convites, lista de quadros e quadro ativo
+        ├── DetalheGrupo      membros, convite e formulário de card
+        │   └── QuadroKanban  colunas, cards, drag-and-drop e responsáveis
+        ├── PerfilEdicaoModal
+        └── PerfilPublicoModal
+```
+
+Diretrizes do código:
+
+- **`src/services/`** é a única camada que conhece rotas e formatos da API.
+  Componentes e páginas consomem funções desse diretório, nunca `axios` direto.
+- **`src/context/AuthContext.jsx`** centraliza a sessão e é a fonte de verdade
+  para `usuario` e `token`.
+- **`src/utils/`** contém funções puras (datas, prioridades, tópicos, regras do
+  quadro). É a parte coberta por testes automatizados.
+- **`src/styles/ui.js`** reúne as classes Tailwind compartilhadas de campos,
+  botões e cartões.
 
 ## Pré-requisitos
 
 - Node.js 20+ e npm.
-- .NET 10 SDK.
-- PostgreSQL 16 (o repositório do backend traz um `docker-compose.yml`).
-- O repositório do backend como pasta irmã:
-  `../meu-estudos-backend`.
+- .NET 10 SDK (para o backend).
+- PostgreSQL 16 ou Docker com Compose (o backend traz um `docker-compose.yml`).
+- O repositório do backend como pasta irmã: `../meu-estudos-backend`.
 
-## 1. Subir o backend
+## Como rodar
+
+### 1. Subir o backend
 
 ```bash
 cd ../meu-estudos-backend
@@ -47,18 +156,21 @@ dotnet run --project MeuEstudos.Api --launch-profile http
 ```
 
 A API fica em `http://localhost:5123`. O banco é inicializado pelo `init.sql` na
-primeira subida do container; para recriar do zero, use
-`docker compose down -v && docker compose up -d`.
+primeira subida do container; para recriar do zero, use:
 
-A configuração de desenvolvimento (conexão e JWT) está em
+```bash
+docker compose down -v && docker compose up -d
+```
+
+A configuração de desenvolvimento (conexão e JWT) fica em
 `MeuEstudos.Api/appsettings.Development.json`.
 
-## 2. Subir o frontend
+### 2. Subir o frontend
 
 ```bash
 cd meu-estudo-frontend
 npm install
-cp .env.example .env   # opcional; o padrão já aponta para localhost:5123
+cp .env.example .env   # opcional: o padrão já aponta para localhost:5123
 npm start
 ```
 
@@ -74,6 +186,8 @@ Abra `http://localhost:5173`.
 npm run dev
 ```
 
+O Vite sobe em `http://localhost:5173` com recarregamento a quente.
+
 > **Atenção:** se o caminho do projeto contiver `#` (por exemplo, `.../C#/...`),
 > o servidor de desenvolvimento do Vite falha ao servir `/@vite/client` e a tela
 > fica em branco. Nesse caso, mova/renomeie a pasta (ex.: `C#` → `CSharp`) ou
@@ -81,94 +195,200 @@ npm run dev
 
 ## Variáveis de ambiente
 
-| Variável | Padrão | Descrição |
-|---|---|---|
-| `VITE_API_URL` | `http://localhost:5123/api` | URL base da API |
+| Variável          | Padrão                      | Descrição            |
+| ----------------- | --------------------------- | -------------------- |
+| `VITE_API_URL`    | `http://localhost:5123/api` | URL base da API      |
 
-Veja `.env.example`. Se o backend rodar em outra porta/host, ajuste a variável
-**e** o CORS em `MeuEstudos.Api/Program.cs`.
+Use o arquivo `.env.example` como referência. Se o backend rodar em outra
+porta/host, ajuste a variável **e** o CORS em `MeuEstudos.Api/Program.cs`.
 
 ## Scripts
 
-| Comando | O que faz |
-|---|---|
-| `npm run dev` | Vite em modo desenvolvimento (HMR) |
-| `npm start` | Build de produção + preview em `http://localhost:5173` |
-| `npm run build` | Gera `dist/` |
+| Comando           | O que faz                                                        |
+| ----------------- | ---------------------------------------------------------------- |
+| `npm run dev`     | Vite em modo desenvolvimento (HMR) em `http://localhost:5173`    |
+| `npm start`       | Build de produção + preview em `http://localhost:5173`            |
+| `npm run build`   | Gera a build em `dist/`                                          |
 | `npm run preview` | Serve `dist/` (porta padrão 4173; use `-- --port 5173` com a API) |
-| `npm run lint` | oxlint |
+| `npm test`        | Executa os testes com `node --test src/utils/*.test.js`          |
+| `npm run lint`    | Executa o oxlint                                                 |
 
-## Estrutura
+## Estrutura do projeto
 
 ```text
 src/
-  components/          Componentes de UI do dashboard
-    DashboardHeader.jsx
-    ConvitesPendentes.jsx
-    ListaGrupos.jsx
-    FormNovoGrupo.jsx
-    DetalheGrupo.jsx
-    ListaTopicos.jsx
-    StatusBadge.jsx
-    FeedbackBanner.jsx
-  context/
-    AuthContext.jsx    Sessão global (usuario, token, login, registrar, logout)
-  pages/
-    AuthPage.jsx       Login e cadastro
-    Dashboard.jsx      Orquestra grupos, convites e ações
-  services/
-    api.js             axios, URL base, Bearer, tratamento de 401
-    authService.js     login/registrar
-    grupoService.js    grupos, convites e tópicos
-  styles/
-    ui.js              Classes compartilhadas (campos, botões, cartões)
-  utils/
-    datas.js           Formatação de datas pt-BR
-  App.jsx              AuthProvider + AuthPage/Dashboard
-  main.jsx
-  index.css
+├── components/
+│   ├── Avatar.jsx               Foto ou iniciais do usuário
+│   ├── ConvitesPendentes.jsx    Convites com aceitar/recusar
+│   ├── DashboardHeader.jsx      Cabeçalho, perfil e logout
+│   ├── DetalheGrupo.jsx         Dados do grupo, membros, convite e novo card
+│   ├── FeedbackBanner.jsx       Banners de erro e sucesso
+│   ├── FormNovoGrupo.jsx        Criação de quadro com escolha do tipo
+│   ├── ListaGrupos.jsx          Lista lateral de quadros
+│   ├── Modal.jsx                Modal acessível sobre <dialog>
+│   ├── PerfilEdicaoModal.jsx    Edição do próprio perfil e foto
+│   ├── PerfilPublicoModal.jsx   Visualização de perfil público
+│   ├── PrioridadeBadge.jsx      Selo de prioridade do card
+│   ├── QuadroKanban.jsx         Colunas, cards, DnD e seletores
+│   ├── SeletorTopicos.jsx       Chips de tópicos com validação
+│   └── StatusBadge.jsx          Selo de status de convite
+├── context/
+│   └── AuthContext.jsx          Sessão global e persistência no localStorage
+├── pages/
+│   ├── AuthPage.jsx             Login e cadastro
+│   └── Dashboard.jsx            Orquestra dados, ações e tempo real
+├── services/
+│   ├── api.js                   axios, URL base, Bearer e tratamento de 401
+│   ├── authService.js           Login e cadastro
+│   ├── grupoService.js          Grupos, convites, cards, mover e responsável
+│   ├── perfilService.js         Perfil, perfil público e upload de foto
+│   └── realtimeService.js       Conexão SignalR com o hub do quadro
+├── styles/
+│   └── ui.js                    Classes Tailwind compartilhadas
+├── utils/
+│   ├── datas.js                 Formatação e comparação de datas pt-BR
+│   ├── imagem.js                Resolve URLs relativas de imagem da API
+│   ├── prioridades.js           Catálogo e estilos de prioridade
+│   ├── quadro.js                Regras de colunas, ordem, participantes e merge
+│   ├── quadro.test.js           Testes das regras do quadro
+│   └── topicos.js               Catálogo e validação de tópicos
+├── App.jsx                      AuthProvider + AuthPage/Dashboard
+├── index.css                    Entrada do Tailwind
+└── main.jsx                     Bootstrap do React
 ```
 
 ## Contrato da API
 
-Todas as rotas exigem `Authorization: Bearer <token>`.
+Todas as rotas abaixo são relativas a `VITE_API_URL` e exigem
+`Authorization: Bearer <token>`.
 
-| Método | Rota | Descrição |
-|---|---|---|
-| `POST` | `/api/auth/login` | `{ email, senha }` → `{ token, usuario }` |
-| `POST` | `/api/auth/registrar` | `{ nome, email, senha }` → `{ token, usuario }` |
-| `GET` | `/api/grupos` | Grupos do usuário (dono ou membro aceito) |
-| `POST` | `/api/grupos` | `{ titulo, descricao? }` |
-| `GET` | `/api/grupos/convites` | Convites pendentes do usuário |
-| `POST` | `/api/grupos/{id}/convites` | `{ email }` (somente dono) |
-| `PATCH` | `/api/grupos/{id}/convites/responder` | `{ aceitar }` |
-| `POST` | `/api/grupos/{id}/topicos` | `{ titulo, descricao?, dataPrevista? }` |
-| `PATCH` | `/api/grupos/{id}/topicos/{topicoId}/concluir` | Alterna a conclusão |
+### Autenticação
 
-Erros seguem `{ "erro": "mensagem" }`; a UI exibe essa mensagem nos banners.
+| Método | Rota                   | Corpo                    | Resposta            |
+| ------ | ---------------------- | ------------------------ | ------------------- |
+| `POST` | `/auth/login`          | `{ email, senha }`       | `{ token, usuario }` |
+| `POST` | `/auth/registrar`      | `{ nome, email, senha }` | `{ token, usuario }` |
 
-## Sessão e permissões
+### Grupos, convites e cards
 
-- O JWT e o usuário ficam em `localStorage` (`token` e `usuario`).
-- Respostas **401** limpam a sessão e recarregam a página.
-- Um usuário sem sessão vê a tela de login/cadastro; com sessão, vê o dashboard.
-- O dono é identificado por `donoId`; apenas ele vê o formulário de convite.
-- `membros` contém os convidados; o dono aparece em `donoNome` e na linha
-  "Dono:" do grupo.
+| Método  | Rota                                      | Descrição                                        |
+| ------- | ----------------------------------------- | ------------------------------------------------ |
+| `GET`   | `/grupos`                                 | Quadros do usuário (dono ou membro aceito)       |
+| `POST`  | `/grupos`                                 | `{ titulo, descricao?, tipo? }`                  |
+| `GET`   | `/grupos/convites`                        | Convites pendentes do usuário                    |
+| `POST`  | `/grupos/{grupoId}/convites`              | `{ email }` (somente o dono)                     |
+| `PATCH` | `/grupos/{grupoId}/convites/responder`    | `{ aceitar }`                                    |
+| `POST`  | `/grupos/{grupoId}/topicos`               | `{ titulo, colunaId, descricao?, dataPrevista?, prioridade?, responsavelId? }` |
+| `PATCH` | `/topicos/{topicoId}/mover`               | `{ colunaId, ordem }`                            |
+| `PATCH` | `/topicos/{topicoId}/responsavel`         | `{ responsavelId }` ou `{ responsavelId: null }` |
+
+### Perfis
+
+| Método | Rota                          | Descrição                                              |
+| ------ | ----------------------------- | ------------------------------------------------------ |
+| `GET`  | `/users/me/profile`           | Perfil completo do usuário autenticado                 |
+| `PUT`  | `/users/me/profile`           | Atualiza nome, bio, curso/área, instituição e tópicos  |
+| `POST` | `/users/me/profile/foto`      | Upload `multipart/form-data` no campo `foto`           |
+| `GET`  | `/users/{usuarioId}/profile`  | Perfil público (sem e-mail)                            |
+
+### Tempo real
+
+| Recurso              | Descrição                                                         |
+| -------------------- | ----------------------------------------------------------------- |
+| Hub `/hubs/quadro`   | Conexão SignalR autenticada pelo token do `localStorage`          |
+| `TopicoAtualizado`   | Evento com `{ grupoId, topico }`, aplicado ao estado do quadro     |
+
+O hub fica na origem da API, sem o sufixo `/api`: com
+`VITE_API_URL=http://localhost:5123/api`, a conexão vai para
+`http://localhost:5123/hubs/quadro`.
+
+### Formato de erro
+
+Erros seguem `{ "erro": "mensagem" }`. A UI usa `mensagemDeErro` para exibir
+essa mensagem nos banners.
+
+## Modelo de dados
+
+**GrupoEstudo**
+
+| Campo       | Tipo                                  | Observação                    |
+| ----------- | ------------------------------------- | ----------------------------- |
+| `id`        | string                                |                               |
+| `titulo`    | string                                |                               |
+| `descricao` | string \| null                        |                               |
+| `tipo`      | `PESSOAL` \| `TRABALHO_ACADEMICO`     | Quadros antigos podem omitir  |
+| `donoId`    | string                                |                               |
+| `donoNome`  | string                                |                               |
+| `colunas`   | `ColunaKanban[]`                      | IDs reais usados pela API     |
+| `membros`   | `MembroGrupo[]`                       |                               |
+| `topicos`   | `TopicoEstudo[]`                      | Cards do quadro               |
+
+**ColunaKanban:** `{ id, titulo, ordem }`
+
+**MembroGrupo:** `{ usuarioId, nome, status }`, com
+`status ∈ { Pendente, Aceito, Recusado }`.
+
+**TopicoEstudo:** `{ id, titulo, descricao, dataPrevista, prioridade,
+colunaId, ordem, responsavelId, responsavelNome, responsavelFotoUrl,
+concluido, criadoPorId, criadoEm }`, com
+`prioridade ∈ { BAIXA, MEDIA, ALTA }`.
+
+**ConvitePendente:** `{ grupoId, grupoTitulo, donoId, donoNome, convidadoEm }`
+
+**Perfil:** `{ id, nome, fotoUrl, bio, cursoOuArea, instituicao,
+topicosInteresse, topicosAjuda, criadoEm }`.
+
+## Sessão, permissões e regras
+
+- O JWT e o usuário ficam em `localStorage` nas chaves `token` e `usuario`.
+- Respostas `401` limpam a sessão e recarregam a página.
+- Sem sessão, o app mostra a tela de login/cadastro; com sessão, o dashboard.
+- O dono é identificado por `donoId`. Apenas ele vê o formulário de convite.
+- Quadros pessoais não exibem convites nem atribuição de responsáveis.
+- O dono aparece em `donoNome`, separado da lista `membros`.
+- Ao mover um card ou trocar o responsável, a UI aplica a mudança de imediato e
+  desfaz se a API retornar erro.
+- Eventos em tempo real e respostas HTTP usam o mesmo *upsert* idempotente por
+  `id`, então a ordem de chegada não duplica cards.
+
+## Testes
+
+```bash
+npm test
+```
+
+Os testes usam o runner nativo do Node e cobrem as regras puras de
+`src/utils/quadro.js`: normalização e ordenação de colunas, coluna inicial e
+selecionada, agrupamento de cards, cálculo de ordem ao mover, participantes de
+um quadro e aplicação de eventos em tempo real (incluindo idempotência).
+
+Não há testes de componentes no momento; a build e o lint também servem de
+verificação:
+
+```bash
+npm run build
+npm run lint
+```
 
 ## Limitações conhecidas
 
-- Sem paginação, atualizações em tempo real, edição ou exclusão de grupos (a
-  API não expõe essas operações).
-- Sem suíte de testes automatizados no repositório; a validação de
-  desenvolvimento foi feita com build, lint e fluxos E2E.
-- `npm run dev` depende de um caminho sem `#` (veja a seção de HMR).
+- Sem paginação ou carregamento incremental de quadros e cards.
+- Edição e exclusão de quadros e cards não estão implementadas no frontend.
+- O tempo real cobre apenas atualizações de cards (`TopicoAtualizado`).
+- O drag-and-drop usa a API nativa de HTML5; em dispositivos touch, use o
+  seletor **"Mover para…"** de cada card.
+- Os testes automatizados cobrem somente as funções de `src/utils/quadro.js`.
+- `npm run dev` depende de um caminho de projeto sem `#` (veja a seção de HMR).
 
-## Troubleshooting
+## Problemas comuns
 
 - **Tela em branco no `npm run dev`:** caminho com `#`; use `npm start` ou
   renomeie a pasta.
-- **Erro de CORS:** confirme que o frontend está em `http://localhost:5173` e a
-  API em `http://localhost:5123` (ou ajuste o CORS no backend).
+- **Erro de CORS:** confirme o frontend em `http://localhost:5173` e a API em
+  `http://localhost:5123`, ou ajuste o CORS no backend.
 - **401 inesperado:** a sessão foi limpa; faça login novamente.
 - **Banco indisponível:** verifique `docker compose ps` e a porta 5432.
+- **Quadro não atualiza em tempo real:** confirme se o hub `/hubs/quadro` está
+  acessível e se o token é válido. A falha é silenciosa por projeto; mover cards
+  e recarregar a página continuam funcionando.
+- **Falha ao enviar foto:** use JPEG, PNG ou WebP com até 2 MB.

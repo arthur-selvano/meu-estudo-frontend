@@ -5,7 +5,7 @@ const TAMANHOS = {
   sm: 'h-8 w-8 text-xs',
   md: 'h-10 w-10 text-sm',
   lg: 'h-16 w-16 text-xl',
-  xl: 'h-24 w-24 text-3xl',
+  xl: 'h-16 w-16 text-xl sm:h-24 sm:w-24 sm:text-3xl',
 }
 
 function iniciais(nome) {

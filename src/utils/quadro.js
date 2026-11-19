@@ -91,6 +91,16 @@ export function topicosDaColuna(topicos, colunaId, colunas) {
     .sort(ordenarTopicos)
 }
 
+/**
+ * Posição de destino ao mover um card: quantidade de cards já presentes na
+ * coluna destino, desconsiderando o próprio card.
+ */
+export function calcularOrdemMover(topicos, topicoId, colunaId, colunas) {
+  return topicosDaColuna(topicos, colunaId, colunas).filter(
+    (item) => item.id !== topicoId,
+  ).length
+}
+
 export function ehColunaConcluida(coluna, colunas) {
   return (
     Boolean(coluna) &&

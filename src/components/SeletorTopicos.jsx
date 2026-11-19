@@ -115,13 +115,13 @@ export default function SeletorTopicos({
           onChange={(event) => setNovoTopico(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Adicionar outro tópico"
-          className={`${CAMPO} flex-1`}
+          className={`${CAMPO} min-w-0 flex-1`}
         />
         <button
           type="button"
           onClick={adicionar}
           disabled={noLimite || desabilitado || !novoTopico.trim()}
-          className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-[#CBD6C8] px-3 py-2 text-xs font-semibold text-[#173D2E] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-lg border border-[#CBD6C8] px-3 py-2 text-xs font-semibold text-[#173D2E] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Plus aria-hidden="true" size={14} />
           Adicionar

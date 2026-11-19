@@ -16,6 +16,7 @@ import { PRIORIDADE_PADRAO } from '../utils/prioridades'
 import {
   adicionarTopicoNoGrupo,
   atualizarTopicoNoGrupo,
+  obterColunas,
 } from '../utils/quadro'
 import {
   adicionarTopico,
@@ -233,6 +234,12 @@ export default function Dashboard() {
           }))
         }
 
+        const tituloColuna = obterColunas(grupoSelecionado).find(
+          (coluna) => coluna.id === colunaId,
+        )?.titulo
+
+        if (tituloColuna) setSucesso(`Card movido para ${tituloColuna}.`)
+
         return true
       } catch (err) {
         atualizarTopico(grupoId, topicoId, () => topicoAnterior)
@@ -311,7 +318,7 @@ export default function Dashboard() {
         onAbrirPerfil={() => setPerfilEdicaoAberto(true)}
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6">
         <FeedbackBanner
           tipo="erro"
           mensagem={erro}
@@ -325,8 +332,8 @@ export default function Dashboard() {
           className="mb-4"
         />
 
-        <div className="grid gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
-          <aside className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
+          <aside className="min-w-0 space-y-4">
             <ConvitesPendentes
               convites={convites}
               respondendo={acao === 'responder'}
@@ -348,7 +355,7 @@ export default function Dashboard() {
             />
           </aside>
 
-          <main>
+          <main className="min-w-0">
             {grupoSelecionado ? (
               <DetalheGrupo
                 grupo={grupoSelecionado}

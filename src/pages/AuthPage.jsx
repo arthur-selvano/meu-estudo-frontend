@@ -90,7 +90,7 @@ export default function AuthPage() {
         </p>
       </aside>
 
-      <main className="flex min-h-screen items-center justify-center px-5 py-12 sm:px-10 lg:min-h-0">
+      <main className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-10 lg:min-h-0">
         <div className="w-full max-w-sm">
           <div className="mb-10 flex items-center gap-3 lg:hidden">
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#12251D] text-[#F4F6F0]">
@@ -99,10 +99,10 @@ export default function AuthPage() {
             <span className="font-serif text-xl tracking-tight">MeuEstudos</span>
           </div>
 
-          <h1 className="font-serif text-4xl tracking-tight">
+          <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">
             {cadastro ? 'Criar conta' : 'Entrar'}
           </h1>
-          <p className="mt-2 text-sm text-[#53655C]">
+          <p className="mt-2 break-words text-sm text-[#53655C]">
             {cadastro
               ? 'Comece a organizar seus estudos hoje.'
               : 'Continue de onde você parou.'}

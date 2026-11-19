@@ -30,7 +30,7 @@ function GrupoTopicos({ titulo, topicos, vazio }) {
           {topicos.map((topico) => (
             <li
               key={topico}
-              className="rounded-full border border-[#CBD6C8] bg-[#F0F4EC] px-2.5 py-1 text-xs text-[#33473C]"
+              className="max-w-full break-words rounded-full border border-[#CBD6C8] bg-[#F0F4EC] px-2.5 py-1 text-xs text-[#33473C]"
             >
               {topico}
             </li>
@@ -82,7 +82,7 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
       onFechar={onFechar}
       className="max-w-lg"
     >
-        <div className="flex items-center justify-between gap-3 border-b border-[#E1E8DE] px-5 py-3">
+        <div className="flex items-center justify-between gap-3 border-b border-[#E1E8DE] px-4 py-3 sm:px-5">
           <p className="text-xs font-medium tracking-wide text-[#6B7D71] uppercase">
             Perfil
           </p>
@@ -90,7 +90,7 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
             type="button"
             onClick={onFechar}
             aria-label="Fechar perfil"
-            className="rounded-lg p-1.5 text-[#53655C] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-lg p-1.5 text-[#53655C] transition-colors hover:bg-[#EEF2EA] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-[#2F6F4E]/25"
           >
             <X aria-hidden="true" size={18} />
           </button>
@@ -106,9 +106,9 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
             <span className="sr-only">Carregando perfil</span>
           </div>
         ) : erro ? (
-          <div className="space-y-3 px-5 py-6">
+          <div className="space-y-3 px-4 py-6 sm:px-5">
             <FeedbackBanner tipo="erro" mensagem={erro} />
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={tentarNovamente}
@@ -126,7 +126,7 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
             </div>
           </div>
         ) : perfil ? (
-          <div className="space-y-5 px-5 py-5">
+          <div className="space-y-5 px-4 py-5 sm:px-5">
             <div className="flex flex-wrap items-center gap-4">
               <Avatar
                 nome={perfil.nome}
@@ -137,13 +137,13 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
               <div className="min-w-0">
                 <h2
                   id="titulo-perfil-publico"
-                  className="font-serif text-2xl leading-tight tracking-tight text-[#12251D]"
+                  className="break-words font-serif text-2xl leading-tight tracking-tight text-[#12251D]"
                 >
                   {perfil.nome}
                 </h2>
 
                 {(perfil.cursoOuArea || perfil.instituicao) && (
-                  <p className="mt-1 text-sm text-[#53655C]">
+                  <p className="mt-1 break-words text-sm text-[#53655C]">
                     {[perfil.cursoOuArea, perfil.instituicao]
                       .filter(Boolean)
                       .join(' · ')}
@@ -161,7 +161,7 @@ export default function PerfilPublicoModal({ usuarioId, onFechar }) {
               <h3 className="text-sm font-semibold text-[#33473C]">
                 Sobre
               </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-[#53655C]">
+              <p className="mt-1.5 break-words text-sm leading-relaxed text-[#53655C]">
                 {perfil.bio || 'Ainda não escreveu uma biografia.'}
               </p>
             </section>

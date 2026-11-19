@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { CalendarDays, GripVertical, UserRound } from 'lucide-react'
 import Avatar from './Avatar'
 import PrioridadeBadge from './PrioridadeBadge'
 import { dataEstaVencida, formatarDataSimples } from '../utils/datas'
 import {
   TIPO_TRABALHO_ACADEMICO,
+  calcularOrdemMover,
   ehColunaConcluida,
   idColunaDoTopico,
   topicosDaColuna,
@@ -64,7 +65,7 @@ function SeletorResponsavel({
             onChange={(event) =>
               onAlterarResponsavel(event.target.value || null)
             }
-            className="mt-0.5 w-full rounded-md border border-[#DCE3D8] bg-white px-1.5 py-1 text-[11px] text-[#33473C] outline-none transition-colors focus:border-[#2F6F4E] focus:ring-2 focus:ring-[#2F6F4E]/15 disabled:cursor-wait disabled:opacity-60"
+            className="mt-0.5 min-h-11 w-full rounded-md border border-[#DCE3D8] bg-white px-1.5 py-1 text-[11px] text-[#33473C] outline-none transition-colors focus:border-[#2F6F4E] focus:ring-2 focus:ring-[#2F6F4E]/15 disabled:cursor-wait disabled:opacity-60"
           >
             <option value="">Sem responsável</option>
             {participantes.map((pessoa) => (
@@ -79,10 +80,48 @@ function SeletorResponsavel({
   )
 }
 
+function SeletorMover({ topico, colunaAtualId, colunas, desabilitado, onMover }) {
+  const destinos = colunas.filter((coluna) => coluna.id !== colunaAtualId)
+
+  if (destinos.length === 0) return null
+
+  return (
+    <div
+      className="mt-2.5 border-t border-[#EDF1EA] pt-2.5"
+      onDragStart={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+      }}
+    >
+      <label htmlFor={`mover-${topico.id}`} className="sr-only">
+        Mover {topico.titulo} para outra coluna
+      </label>
+      <select
+        id={`mover-${topico.id}`}
+        value=""
+        disabled={desabilitado}
+        onChange={(event) => {
+          if (event.target.value) onMover(event.target.value)
+        }}
+        className="min-h-11 w-full min-w-0 rounded-md border border-[#DCE3D8] bg-white px-2 py-1.5 text-sm text-[#33473C] outline-none transition-colors focus:border-[#2F6F4E] focus:ring-2 focus:ring-[#2F6F4E]/15 disabled:cursor-wait disabled:opacity-60"
+      >
+        <option value="">Mover para…</option>
+        {destinos.map((coluna) => (
+          <option key={coluna.id} value={coluna.id}>
+            {coluna.titulo}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 function CartaoTopico({
   topico,
   tipo,
   participantes,
+  colunas,
+  colunaAtualId,
   colunaConcluida,
   arrastando,
   movendo,
@@ -90,16 +129,19 @@ function CartaoTopico({
   onDragStart,
   onDragEnd,
   onAlterarResponsavel,
+  onMover,
 }) {
   const vencido =
     !colunaConcluida && dataEstaVencida(topico.dataPrevista)
 
   return (
     <article
+      data-topico-id={topico.id}
+      tabIndex={-1}
       draggable={!movendo}
       onDragStart={(event) => onDragStart(event, topico)}
       onDragEnd={onDragEnd}
-      className={`rounded-lg border border-[#DCE3D8] bg-white p-3 shadow-sm transition-shadow ${
+      className={`min-w-0 rounded-lg border border-[#DCE3D8] bg-white p-3 shadow-sm transition-shadow focus:outline-none focus:ring-[3px] focus:ring-[#2F6F4E]/25 ${
         arrastando
           ? 'opacity-50'
           : 'hover:shadow-md'
@@ -114,12 +156,12 @@ function CartaoTopico({
         <GripVertical
           aria-hidden="true"
           size={14}
-          className="mt-0.5 shrink-0 text-[#B7C3B4]"
+          className="pointer-coarse:hidden mt-0.5 shrink-0 text-[#B7C3B4]"
         />
       </div>
 
       <h4
-        className={`mt-2 text-sm font-medium leading-snug ${
+        className={`mt-2 break-words text-sm font-medium leading-snug ${
           colunaConcluida
             ? 'text-[#6B7D71] line-through'
             : 'text-[#12251D]'
@@ -129,7 +171,7 @@ function CartaoTopico({
       </h4>
 
       {topico.descricao && (
-        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#6B7D71]">
+        <p className="mt-1 line-clamp-2 break-words text-xs leading-relaxed text-[#6B7D71]">
           {topico.descricao}
         </p>
       )}
@@ -158,6 +200,14 @@ function CartaoTopico({
           }
         />
       )}
+
+      <SeletorMover
+        topico={topico}
+        colunaAtualId={colunaAtualId}
+        colunas={colunas}
+        desabilitado={movendo}
+        onMover={onMover}
+      />
     </article>
   )
 }
@@ -174,6 +224,24 @@ export default function QuadroKanban({
 }) {
   const [arrastandoId, setArrastandoId] = useState(null)
   const [colunaSobre, setColunaSobre] = useState(null)
+  const raizRef = useRef(null)
+
+  async function onMoverPeloSeletor(topicoId, colunaId) {
+    if (movendo) return
+
+    const ordem = calcularOrdemMover(topicos, topicoId, colunaId, colunas)
+    const movido = await onMover(topicoId, colunaId, ordem)
+
+    if (movido === false) return
+
+    requestAnimationFrame(() => {
+      const card = raizRef.current?.querySelector(
+        `[data-topico-id="${CSS.escape(topicoId)}"]`,
+      )
+
+      card?.focus()
+    })
+  }
 
   function handleDragStart(event, topico) {
     if (movendo || event.defaultPrevented) {
@@ -220,15 +288,18 @@ export default function QuadroKanban({
     // Soltar na própria coluna não precisa de chamada à API.
     if (idColunaDoTopico(topico, colunas) === coluna.id) return
 
-    const cardsNaColuna = topicosDaColuna(topicos, coluna.id, colunas).filter(
-      (item) => item.id !== topicoId,
+    onMover(
+      topicoId,
+      coluna.id,
+      calcularOrdemMover(topicos, topicoId, coluna.id, colunas),
     )
-
-    onMover(topicoId, coluna.id, cardsNaColuna.length)
   }
 
   return (
-    <div className="grid grid-flow-col auto-cols-[minmax(13.5rem,1fr)] gap-3 overflow-x-auto pb-2">
+    <div
+      ref={raizRef}
+      className="grid grid-cols-1 gap-3 pb-2 sm:grid-cols-2 xl:grid-cols-4"
+    >
       {colunas.map((coluna, indice) => {
         const cards = topicosDaColuna(topicos, coluna.id, colunas)
         const sobre = colunaSobre === coluna.id
@@ -245,7 +316,7 @@ export default function QuadroKanban({
             }}
             onDragLeave={(event) => handleDragLeave(event, coluna.id)}
             onDrop={(event) => handleDrop(event, coluna)}
-            className={`flex min-h-64 flex-col rounded-xl border transition-colors ${
+            className={`flex min-h-64 min-w-0 flex-col rounded-xl border transition-colors ${
               sobre
                 ? 'border-[#2F6F4E] bg-[#E3EFE0] ring-2 ring-[#2F6F4E]/15'
                 : 'border-[#DCE3D8] bg-[#EEF2EA]'
@@ -276,11 +347,13 @@ export default function QuadroKanban({
                 </li>
               ) : (
                 cards.map((topico) => (
-                  <li key={topico.id}>
+                  <li key={topico.id} className="min-w-0">
                     <CartaoTopico
                       topico={topico}
                       tipo={tipo}
                       participantes={participantes}
+                      colunas={colunas}
+                      colunaAtualId={coluna.id}
                       colunaConcluida={concluida}
                       arrastando={arrastandoId === topico.id}
                       movendo={movendo}
@@ -288,6 +361,9 @@ export default function QuadroKanban({
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
                       onAlterarResponsavel={onAlterarResponsavel}
+                      onMover={(destinoId) =>
+                        onMoverPeloSeletor(topico.id, destinoId)
+                      }
                     />
                   </li>
                 ))
