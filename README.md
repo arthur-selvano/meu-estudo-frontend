@@ -1,10 +1,10 @@
-# MeuEstudos — Frontend
+# MeuEstudo — Frontend
 
 Aplicação web (SPA) para organizar grupos de estudo: quadros Kanban colaborativos,
 convites por e-mail, rotina de tópicos, perfis públicos e atualizações em tempo real.
 
-Este repositório contém apenas o frontend. A API é o projeto .NET **MeuEstudos**,
-mantido no repositório irmão `../meu-estudos-backend`.
+Este repositório contém apenas o frontend. A API é o projeto .NET **MeuEstudo**,
+mantido no repositório irmão `../meu-estudo-backend`.
 
 ## Sumário
 
@@ -26,7 +26,7 @@ mantido no repositório irmão `../meu-estudos-backend`.
 
 ## Sobre o projeto
 
-O MeuEstudos ajuda estudantes a organizar o que precisam estudar e a dividir
+O MeuEstudo ajuda estudantes a organizar o que precisam estudar e a dividir
 trabalhos em grupo. Cada usuário pode criar quadros de dois tipos:
 
 - **Organização pessoal** (`PESSOAL`): rotinas e tarefas próprias, sem convites
@@ -160,16 +160,16 @@ Diretrizes do código:
 - Node.js 20+ e npm.
 - .NET 10 SDK (para o backend).
 - PostgreSQL 16 ou Docker com Compose (o backend traz um `docker-compose.yml`).
-- O repositório do backend como pasta irmã: `../meu-estudos-backend`.
+- O repositório do backend como pasta irmã: `../meu-estudo-backend`.
 
 ## Como rodar
 
 ### 1. Subir o backend
 
 ```bash
-cd ../meu-estudos-backend
+cd ../meu-estudo-backend
 docker compose up -d
-dotnet run --project MeuEstudos.Api --launch-profile http
+dotnet run --project MeuEstudo.Api --launch-profile http
 ```
 
 A API fica em `http://localhost:5123`. O banco é inicializado pelo `init.sql` na
@@ -180,7 +180,7 @@ docker compose down -v && docker compose up -d
 ```
 
 A configuração de desenvolvimento (conexão e JWT) fica em
-`MeuEstudos.Api/appsettings.Development.json`.
+`MeuEstudo.Api/appsettings.Development.json`.
 
 ### 2. Subir o frontend
 
@@ -217,7 +217,7 @@ O Vite sobe em `http://localhost:5173` com recarregamento a quente.
 | `VITE_API_URL`    | `http://localhost:5123/api` | URL base da API      |
 
 Use o arquivo `.env.example` como referência. Se o backend rodar em outra
-porta/host, ajuste a variável **e** o CORS em `MeuEstudos.Api/Program.cs`.
+porta/host, ajuste a variável **e** o CORS em `MeuEstudo.Api/Program.cs`.
 
 ## Scripts
 

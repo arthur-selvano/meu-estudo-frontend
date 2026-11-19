@@ -135,12 +135,7 @@ export default function ComposerPublicacao({ usuario, publicando, onPublicar }) 
       <div className="flex items-center gap-3">
         <Avatar nome={usuario.nome} fotoUrl={usuario.fotoUrl} tamanho="sm" />
         <div className="min-w-0">
-          <h2 className="font-serif text-lg leading-tight">
-            Compartilhe com a comunidade
-          </h2>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            Peça ajuda, publique uma aula, link ou documento de estudo.
-          </p>
+          <h2 className="text-sm font-semibold text-ink">Nova publicação</h2>
         </div>
       </div>
 

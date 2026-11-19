@@ -12,7 +12,7 @@ export default function ListaGrupos({
   return (
     <section className={`${CARTAO} min-w-0 p-4`}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="font-serif text-lg">Meus quadros</h2>
+        <h2 className="text-sm font-semibold text-ink">Meu quadro</h2>
         <button
           type="button"
           onClick={onAlternarFormulario}
@@ -41,7 +41,7 @@ export default function ListaGrupos({
                   aria-current={selecionado ? 'true' : undefined}
                   className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/20 ${
                     selecionado
-                      ? 'border-accent-line bg-accent-soft text-accent-ink'
+                      ? 'border-field-line bg-surface-hover text-ink'
                       : 'border-transparent text-ink-soft hover:bg-surface-hover'
                   }`}
                 >
@@ -50,8 +50,8 @@ export default function ListaGrupos({
                     <span
                       className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
                         pessoal
-                          ? 'bg-accent-soft text-success-ink'
-                          : 'bg-surface text-ink-soft'
+                          ? 'bg-surface-hover text-ink-muted'
+                          : 'border border-line bg-surface text-ink-muted'
                       }`}
                     >
                       {pessoal ? 'Pessoal' : 'Acadêmico'}

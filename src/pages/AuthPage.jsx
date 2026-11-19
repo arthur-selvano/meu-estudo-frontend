@@ -63,55 +63,40 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-page text-ink lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <BotaoTema className="fixed right-4 top-4 z-30 rounded-full border border-field-line bg-surface shadow-sm" />
+      <BotaoTema className="fixed right-4 top-4 z-30 rounded-md border border-field-line bg-surface" />
 
-      <aside className="relative hidden flex-col justify-between overflow-hidden bg-inverse p-12 lg:flex">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[repeating-linear-gradient(to_bottom,transparent,transparent_47px,rgba(255,255,255,0.06)_47px,rgba(255,255,255,0.06)_48px)]"
-        />
-
-        <div className="relative flex items-center gap-3 text-inverse-soft">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full border border-inverse-soft/25">
+      <aside className="relative hidden flex-col justify-center gap-12 overflow-hidden bg-inverse p-12 lg:flex">
+        <div className="flex items-center gap-3 text-inverse-soft">
+          <span className="flex h-9 w-9 items-center justify-center rounded-md border border-inverse-soft/25">
             <GraduationCap aria-hidden="true" size={20} strokeWidth={1.8} />
           </span>
           <span className="text-sm font-medium tracking-wide">Meu Estudo</span>
         </div>
 
-        <div className="relative max-w-md">
-          <p className="font-serif text-5xl leading-[1.05] tracking-tight text-inverse-ink">
-            Seus estudos, organizados.
+        <div className="max-w-md">
+          <p className="text-3xl font-semibold leading-tight tracking-tight text-inverse-ink">
+            Organize seus estudos.
           </p>
-          <p className="mt-6 max-w-sm text-base leading-relaxed text-inverse-muted">
-            Crie grupos, abra tópicos e convide colegas. Tudo em um só lugar,
-            longe da bagunça.
+          <p className="mt-3 max-w-sm text-sm leading-relaxed text-inverse-muted">
+            Crie quadros, organize tarefas e convide colegas.
           </p>
         </div>
-
-        <p className="relative text-sm text-inverse-faint">
-          Um espaço para estudar com calma.
-        </p>
       </aside>
 
-      <main className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-10 lg:min-h-0">
+      <main className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-10 lg:min-h-0">
         <div className="w-full max-w-sm">
-          <div className="mb-10 flex items-center gap-3 lg:hidden">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary">
+          <div className="mb-8 flex items-center gap-3 lg:hidden">
+            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-ink text-surface">
               <GraduationCap aria-hidden="true" size={20} strokeWidth={1.8} />
             </span>
-            <span className="font-serif text-xl tracking-tight">Meu Estudo</span>
+            <span className="text-base font-semibold tracking-tight">Meu Estudo</span>
           </div>
 
-          <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">
+          <h1 className="text-2xl font-semibold tracking-tight">
             {cadastro ? 'Criar conta' : 'Entrar'}
           </h1>
-          <p className="mt-2 break-words text-sm text-ink-secondary">
-            {cadastro
-              ? 'Comece a organizar seus estudos hoje.'
-              : 'Continue de onde você parou.'}
-          </p>
 
-          <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-4">
             {cadastro && (
               <div>
                 <label htmlFor="nome" className={ROTULO_AUTH}>
@@ -128,7 +113,7 @@ export default function AuthPage() {
                     disabled={carregando}
                     value={nome}
                     onChange={(event) => setNome(event.target.value)}
-                    placeholder="Como podemos chamar você?"
+                    placeholder="Seu nome"
                     className={CAMPO_AUTH}
                   />
                 </div>
@@ -189,7 +174,7 @@ export default function AuthPage() {
               type="submit"
               disabled={carregando}
               aria-busy={carregando}
-              className={`${BOTAO_PRIMARIO} w-full px-4 py-3 text-[15px]`}
+              className={`${BOTAO_PRIMARIO} w-full px-4 py-2.5 text-sm`}
             >
               {carregando && (
                 <Loader2
@@ -202,7 +187,7 @@ export default function AuthPage() {
             </button>
           </form>
 
-          <p className="mt-7 text-sm text-ink-secondary">
+          <p className="mt-6 text-sm text-ink-secondary">
             {cadastro ? 'Já tem uma conta?' : 'Ainda não tem conta?'}{' '}
             <button
               type="button"

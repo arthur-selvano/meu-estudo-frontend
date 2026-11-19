@@ -5,7 +5,7 @@ import { formatarDataHora } from '../utils/datas'
 export default function ConvitesPendentes({ convites, respondendo, onResponder }) {
   return (
     <section className={`${CARTAO} min-w-0 p-4`}>
-      <h2 className="font-serif text-lg">Convites pendentes</h2>
+      <h2 className="text-sm font-semibold text-ink">Convite pendente</h2>
 
       {convites.length === 0 ? (
         <p className="mt-2 text-sm text-ink-muted">Nenhum convite pendente.</p>

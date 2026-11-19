@@ -59,7 +59,7 @@ export default function FormNovoGrupo({ aberto, criando, onCriar }) {
       onSubmit={handleSubmit}
       className={`${CARTAO} scroll-mt-28 p-4 md:scroll-mt-20`}
     >
-      <h2 className="font-serif text-lg">Novo quadro</h2>
+      <h2 className="text-lg">Novo quadro</h2>
 
       <div className="mt-3 space-y-3">
         <fieldset>
@@ -78,11 +78,11 @@ export default function FormNovoGrupo({ aberto, criando, onCriar }) {
                   className="peer sr-only"
                 />
 
-                <span className="flex gap-2.5 rounded-lg border border-field-line bg-surface p-3 transition-colors hover:bg-surface-muted peer-checked:border-brand peer-checked:bg-accent-soft peer-checked:ring-1 peer-checked:ring-brand/30 peer-focus-visible:ring-[3px] peer-focus-visible:ring-brand/25">
+                <span className="flex gap-2.5 rounded-md border border-field-line bg-surface p-3 transition-colors hover:bg-surface-muted peer-checked:border-ink/30 peer-checked:bg-surface-hover peer-checked:ring-1 peer-checked:ring-ink/10 peer-focus-visible:ring-2 peer-focus-visible:ring-brand/25">
                   <Icone
                     aria-hidden="true"
                     size={17}
-                    className="mt-0.5 shrink-0 text-brand"
+                    className="mt-0.5 shrink-0 text-ink-muted"
                   />
 
                   <span className="min-w-0">

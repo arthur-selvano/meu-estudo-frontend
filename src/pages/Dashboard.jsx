@@ -54,8 +54,7 @@ export default function Dashboard() {
   const [carregandoInicial, setCarregandoInicial] = useState(true)
   const [erro, setErro] = useState('')
   const [acao, setAcao] = useState('')
-  const [visao, setVisao] = useState('quadros')
-  const [secaoAtiva, setSecaoAtiva] = useState('quadros')
+  const [pagina, setPagina] = useState('quadro')
   const [confirmacao, setConfirmacao] = useState(null)
 
   const grupoSelecionado =
@@ -137,27 +136,9 @@ export default function Dashboard() {
     }
   }
 
-  function handleIrParaSecao(secao) {
-    const trocandoVisao =
-      secao === 'comunidade' ? visao !== 'comunidade' : visao !== 'quadros'
-
-    setVisao(secao === 'comunidade' ? 'comunidade' : 'quadros')
-    setSecaoAtiva(secao)
-
-    if (trocandoVisao) {
-      requestAnimationFrame(() => {
-        const alvo = document.getElementById(secao)
-
-        if (alvo) alvo.scrollIntoView({ block: 'start', behavior: 'smooth' })
-        else window.scrollTo({ top: 0, behavior: 'smooth' })
-      })
-    }
-  }
-
-  function handleNovoQuadro() {
-    setVisao('quadros')
-    setSecaoAtiva('quadros')
-    setFormularioAberto(true)
+  function handleNavegar(novaPagina) {
+    setPagina(novaPagina)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   function handleCriarGrupo(dados) {
@@ -416,11 +397,9 @@ export default function Dashboard() {
       <div id="topo" className="min-h-screen bg-page text-ink">
         <Navbar
           usuario={usuario}
-          convitesPendentes={0}
-          secaoAtiva={null}
+          paginaAtiva={pagina}
           carregando
-          onIrParaSecao={() => {}}
-          onNovoQuadro={() => {}}
+          onNavegar={() => {}}
           onSair={logout}
           onAbrirPerfil={() => setPerfilEdicaoAberto(true)}
         />
@@ -447,51 +426,35 @@ export default function Dashboard() {
     <div id="topo" className="min-h-screen bg-page text-ink">
       <Navbar
         usuario={usuario}
-        convitesPendentes={convites.length}
-        secaoAtiva={secaoAtiva}
-        onIrParaSecao={handleIrParaSecao}
-        onNovoQuadro={handleNovoQuadro}
+        paginaAtiva={pagina}
+        onNavegar={handleNavegar}
         onSair={logout}
         onAbrirPerfil={() => setPerfilEdicaoAberto(true)}
       />
 
-      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6">
-        {visao === 'comunidade' ? (
-          <main
-            id="comunidade"
-            tabIndex={-1}
-            className="scroll-mt-28 focus:outline-none md:scroll-mt-20"
-          >
+      <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-5">
+        <FeedbackBanner
+          tipo="erro"
+          mensagem={erro}
+          onFechar={() => setErro('')}
+          className="mb-4"
+        />
+
+        {pagina === 'comunidade' ? (
+          <main className="min-w-0">
             <Comunidade usuario={usuario} onVerPerfil={setPerfilPublicoId} />
           </main>
-        ) : (
-          <>
-            <FeedbackBanner
-              tipo="erro"
-              mensagem={erro}
-              onFechar={() => setErro('')}
-              className="mb-4"
+        ) : pagina === 'convite' ? (
+          <main className="mx-auto w-full max-w-3xl">
+            <ConvitesPendentes
+              convites={convites}
+              respondendo={acao === 'responder'}
+              onResponder={handleResponderConvite}
             />
-
-            <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
-          <aside className="min-w-0 space-y-4">
-            <div
-              id="convites"
-              tabIndex={-1}
-              className="scroll-mt-28 focus:outline-none md:scroll-mt-20"
-            >
-              <ConvitesPendentes
-                convites={convites}
-                respondendo={acao === 'responder'}
-                onResponder={handleResponderConvite}
-              />
-            </div>
-
-            <div
-              id="quadros"
-              tabIndex={-1}
-              className="scroll-mt-28 focus:outline-none md:scroll-mt-20"
-            >
+          </main>
+        ) : (
+          <main className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-[20rem_minmax(0,1fr)]">
+            <aside className="min-w-0 space-y-4">
               <ListaGrupos
                 grupos={grupos}
                 selecionadoId={grupoSelecionadoId}
@@ -499,50 +462,50 @@ export default function Dashboard() {
                 formularioAberto={formularioAberto}
                 onAlternarFormulario={() => setFormularioAberto((aberto) => !aberto)}
               />
-            </div>
 
-            <FormNovoGrupo
-              aberto={formularioAberto}
-              criando={acao === 'criar'}
-              onCriar={handleCriarGrupo}
-            />
-          </aside>
-
-          <main className="min-w-0">
-            {grupoSelecionado ? (
-              <DetalheGrupo
-                grupo={grupoSelecionado}
-                usuario={usuario}
-                acao={acao}
-                onConvidar={handleConvidar}
-                onAdicionarTopico={handleAdicionarTopico}
-                onMoverTopico={handleMoverTopico}
-                onAlterarResponsavel={handleAlterarResponsavel}
-                onVerPerfil={setPerfilPublicoId}
-                onRemoverMembro={handleSolicitarRemocaoMembro}
-                onExcluirQuadro={handleSolicitarExclusaoQuadro}
+              <FormNovoGrupo
+                aberto={formularioAberto}
+                criando={acao === 'criar'}
+                onCriar={handleCriarGrupo}
               />
-            ) : (
-              <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface/60 p-8 text-center">
-                <Users aria-hidden="true" size={26} className="text-ink-faint" />
-                <p className="mt-3 font-serif text-xl">Selecione um quadro</p>
-                <p className="mt-1 max-w-xs text-sm text-ink-muted">
-                  Escolha um quadro na lista ou crie o primeiro para começar.
-                </p>
-                {grupos.length === 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setFormularioAberto(true)}
-                    className={`${BOTAO_PRIMARIO} mt-4 px-4 py-2.5 text-sm`}
-                  >
-                    Criar quadro
-                  </button>
-                )}
-              </div>
-            )}
-          </main>
+            </aside>
+
+            <div className="min-w-0">
+              {grupoSelecionado ? (
+                <DetalheGrupo
+                  grupo={grupoSelecionado}
+                  usuario={usuario}
+                  acao={acao}
+                  onConvidar={handleConvidar}
+                  onAdicionarTopico={handleAdicionarTopico}
+                  onMoverTopico={handleMoverTopico}
+                  onAlterarResponsavel={handleAlterarResponsavel}
+                  onVerPerfil={setPerfilPublicoId}
+                  onRemoverMembro={handleSolicitarRemocaoMembro}
+                  onExcluirQuadro={handleSolicitarExclusaoQuadro}
+                />
+              ) : (
+                <div className="flex min-h-72 flex-col items-start justify-center rounded-lg border border-dashed border-line px-6 py-8">
+                  <Users aria-hidden="true" size={22} className="text-ink-faint" />
+                  <p className="mt-3 text-sm font-medium text-ink">
+                    Nenhum quadro selecionado.
+                  </p>
+                  <p className="mt-1 text-sm text-ink-muted">
+                    Selecione um quadro na lista.
+                  </p>
+                  {grupos.length === 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setFormularioAberto(true)}
+                      className={`${BOTAO_PRIMARIO} mt-4 px-3 py-2 text-sm`}
+                    >
+                      Criar quadro
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
-          </>
+          </main>
         )}
       </div>
 

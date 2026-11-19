@@ -43,7 +43,7 @@ function ToastItem({ toast, onFechar }) {
       onMouseLeave={() => setPausado(false)}
       onFocus={() => setPausado(true)}
       onBlur={handleBlur}
-      className={`pointer-events-auto motion-safe:animate-[toast-entrar_180ms_ease-out] flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm shadow-lg ${estilo.caixa}`}
+      className={`pointer-events-auto motion-safe:animate-[toast-entrar_180ms_ease-out] flex items-start gap-2.5 rounded-lg border px-4 py-3 text-sm ${estilo.caixa}`}
     >
       <Icone aria-hidden="true" size={18} className="mt-0.5 shrink-0" />
       <p className="min-w-0 flex-1 break-words leading-snug">

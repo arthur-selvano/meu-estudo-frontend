@@ -47,6 +47,7 @@ export default function CardPublicacao({
   onVerPerfil,
 }) {
   const [texto, setTexto] = useState('')
+  const [comentariosAbertos, setComentariosAbertos] = useState(false)
 
   const info = infoTipoPublicacao(publicacao.tipo)
   const souAutor = publicacao.autorId === usuario.id
@@ -66,31 +67,29 @@ export default function CardPublicacao({
 
   return (
     <article className={`${CARTAO} p-4 sm:p-5`}>
-      <header className="flex items-start gap-3">
+      <header className="flex items-center gap-2.5">
         <Avatar
           nome={publicacao.autorNome}
           fotoUrl={publicacao.autorFotoUrl}
           tamanho="sm"
         />
 
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <BotaoAutor
-              nome={publicacao.autorNome}
-              autorId={publicacao.autorId}
-              onVerPerfil={onVerPerfil}
-              className="text-sm font-semibold text-ink"
-            />
-            <span
-              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${info.classeBadge}`}
-            >
-              {info.rotulo}
-            </span>
-          </div>
-          <p className="mt-0.5 text-xs text-ink-muted">
-            {formatarDataHora(publicacao.criadoEm)}
-          </p>
-        </div>
+        <BotaoAutor
+          nome={publicacao.autorNome}
+          autorId={publicacao.autorId}
+          onVerPerfil={onVerPerfil}
+          className="min-w-0 truncate text-sm font-semibold text-ink"
+        />
+
+        <span
+          className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] tracking-wide uppercase ${info.classeBadge}`}
+        >
+          {info.rotulo}
+        </span>
+
+        <span className="ml-auto hidden shrink-0 text-xs text-ink-muted sm:inline">
+          {formatarDataHora(publicacao.criadoEm)}
+        </span>
 
         {souAutor && (
           <button
@@ -98,16 +97,16 @@ export default function CardPublicacao({
             onClick={() => onSolicitarExclusao(publicacao)}
             aria-label="Excluir publicação"
             title="Excluir publicação"
-            className={`${BOTAO_ICONE_PERIGO} h-9 w-9 shrink-0`}
+            className={`${BOTAO_ICONE_PERIGO} h-8 w-8 shrink-0`}
           >
-            <Trash2 aria-hidden="true" size={16} />
+            <Trash2 aria-hidden="true" size={15} />
           </button>
         )}
       </header>
 
       <div className="mt-3 space-y-2">
         {publicacao.titulo && (
-          <h3 className="break-words font-serif text-xl leading-tight text-ink">
+          <h3 className="break-words text-base font-semibold leading-tight text-ink">
             {publicacao.titulo}
           </h3>
         )}
@@ -178,15 +177,22 @@ export default function CardPublicacao({
           {publicacao.curtidas}
         </button>
 
-        <span className="inline-flex min-h-9 items-center gap-1.5 px-1 text-xs font-medium text-ink-muted">
+        <button
+          type="button"
+          onClick={() => setComentariosAbertos((aberto) => !aberto)}
+          aria-expanded={comentariosAbertos}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium text-ink-muted transition-colors hover:bg-surface-hover hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25"
+        >
           <MessageCircle aria-hidden="true" size={15} />
           {publicacao.comentarios.length}{' '}
           {publicacao.comentarios.length === 1 ? 'comentário' : 'comentários'}
-        </span>
+        </button>
       </div>
 
-      {publicacao.comentarios.length > 0 && (
-        <ul className="mt-2 space-y-2.5 border-t border-line-faint pt-3">
+      {comentariosAbertos && (
+        <>
+          {publicacao.comentarios.length > 0 && (
+            <ul className="mt-2 space-y-2.5 border-t border-line-faint pt-3">
           {publicacao.comentarios.map((comentario) => (
             <li key={comentario.id} className="flex items-start gap-2">
               <Avatar
@@ -213,9 +219,9 @@ export default function CardPublicacao({
             </li>
           ))}
         </ul>
-      )}
+          )}
 
-      <form onSubmit={handleComentar} className="mt-3 flex gap-2">
+          <form onSubmit={handleComentar} className="mt-3 flex gap-2">
         <label htmlFor={`comentario-${publicacao.id}`} className="sr-only">
           Comentar publicação de {publicacao.autorNome}
         </label>
@@ -245,7 +251,9 @@ export default function CardPublicacao({
           )}
           <span className="hidden sm:inline">Comentar</span>
         </button>
-      </form>
+          </form>
+        </>
+      )}
     </article>
   )
 }

@@ -47,7 +47,7 @@ export default function Modal({
       aria-label={label}
       onCancel={handleCancel}
       onClick={handleClick}
-      className={`m-auto max-h-[90vh] w-[calc(100%-2rem)] overflow-hidden rounded-xl border border-line bg-surface-muted p-0 text-ink shadow-xl backdrop:bg-black/50 ${className}`}
+      className={`m-auto max-h-[90vh] w-[calc(100%-2rem)] overflow-hidden rounded-lg border border-line bg-surface p-0 text-ink backdrop:bg-black/40 ${className}`}
     >
       <div className="max-h-[90vh] overflow-y-auto">{children}</div>
     </dialog>

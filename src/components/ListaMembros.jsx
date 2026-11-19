@@ -60,9 +60,9 @@ export default function ListaMembros({ usuarioId, onVerPerfil }) {
   return (
     <section className={`${CARTAO} min-w-0 p-4`}>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-1.5 font-serif text-lg">
-          <Users aria-hidden="true" size={17} className="text-ink-faint" />
-          Membros
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-ink">
+          <Users aria-hidden="true" size={15} className="text-ink-faint" />
+          Membro
         </h2>
         {membros.length > 0 && (
           <span className="rounded-full bg-surface-soft px-2 py-0.5 text-xs font-semibold text-ink-muted">
@@ -70,10 +70,6 @@ export default function ListaMembros({ usuarioId, onVerPerfil }) {
           </span>
         )}
       </div>
-
-      <p className="mt-0.5 text-xs text-ink-muted">
-        Encontre pessoas pelos interesses, curso ou instituição.
-      </p>
 
       <div className="relative mt-3">
         <Search
@@ -89,7 +85,7 @@ export default function ListaMembros({ usuarioId, onVerPerfil }) {
           type="search"
           value={busca}
           onChange={(event) => setBusca(event.target.value)}
-          placeholder="Buscar membros..."
+          placeholder="Buscar membro..."
           className={`${CAMPO_ICONE} py-2 text-sm`}
         />
       </div>
@@ -120,7 +116,7 @@ export default function ListaMembros({ usuarioId, onVerPerfil }) {
         <p className="mt-3 text-sm text-ink-muted">
           {membros.length === 0
             ? 'Nenhum membro cadastrado ainda.'
-            : 'Nenhum membro encontrado para esta busca.'}
+            : 'Nenhum membro encontrado.'}
         </p>
       ) : (
         <ul className="mt-3 max-h-80 space-y-1 overflow-y-auto pr-1">
@@ -150,7 +146,7 @@ export default function ListaMembros({ usuarioId, onVerPerfil }) {
                         {perfil.nome}
                       </span>
                       {souEu && (
-                        <span className="shrink-0 rounded-full bg-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent-ink">
+                        <span className="shrink-0 rounded-full border border-line bg-surface px-1.5 py-0.5 text-[10px] font-medium text-ink-muted">
                           você
                         </span>
                       )}
