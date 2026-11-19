@@ -154,6 +154,7 @@ export default function AuthPage() {
                   autoComplete={cadastro ? 'new-password' : 'current-password'}
                   required
                   minLength={cadastro ? 8 : undefined}
+                  maxLength={128}
                   disabled={carregando}
                   value={senha}
                   onChange={(event) => setSenha(event.target.value)}

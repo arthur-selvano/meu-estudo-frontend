@@ -46,6 +46,10 @@ responsáveis e acompanhar prazos. Tudo em português e com layout responsivo.
 - Login e cadastro com JWT.
 - Sessão persistida no `localStorage` (`token` e `usuario`).
 - Logout pelo cabeçalho; respostas `401` limpam a sessão automaticamente.
+- Links externos só viram `href` se forem `http://` ou `https://`; esquemas como
+  `javascript:`/`data:` são descartados pela função `urlHttpSegura`.
+- Em produção, `vercel.json` aplica CSP, HSTS, `nosniff`, `Referrer-Policy` e
+  `Permissions-Policy`.
 
 ### Dashboard
 
@@ -219,6 +223,11 @@ O Vite sobe em `http://localhost:5173` com recarregamento a quente.
 Use o arquivo `.env.example` como referência. Se o backend rodar em outra
 porta/host, ajuste a variável **e** o CORS em `MeuEstudo.Api/Program.cs`.
 
+Em produção, a CSP de `vercel.json` libera apenas o domínio atual da API
+(`https://meu-estudos-backend.onrender.com`, incluindo `wss://` para SignalR).
+Ao apontar `VITE_API_URL` para outro domínio, atualize `connect-src` e `img-src`
+em `vercel.json`; caso contrário o browser bloqueará as requisições.
+
 ## Scripts
 
 | Comando           | O que faz                                                        |
@@ -366,12 +375,23 @@ topicosInteresse, topicosAjuda, criadoEm }`.
 ## Sessão, permissões e regras
 
 - O JWT e o usuário ficam em `localStorage` nas chaves `token` e `usuario`.
+  **Risco:** qualquer XSS conseguiria ler o token. Mitigações atuais: React sem
+  `dangerouslySetInnerHTML`, sanitização de URLs, CSP sem `unsafe-inline` para
+  scripts e backend validando todas as permissões.
+- A migração para cookies `HttpOnly`/`Secure`/`SameSite` não foi feita porque o
+  frontend (`vercel.app`) e a API (`onrender.com`) estão em sites diferentes;
+  cookies de terceiros são bloqueados por Safari/ITP e pelo Chrome. A migração é
+  recomendada quando os dois estiverem no mesmo site, junto com proteção CSRF e
+  refresh token rotativo.
 - O tema fica em `localStorage` na chave `tema`, com valores `claro` e `escuro`.
   Sem escolha salva (ou com valor inválido), o tema segue
   `prefers-color-scheme`; uma escolha explícita passa a prevalecer.
 - Respostas `401` limpam a sessão e recarregam a página.
 - Sem sessão, o app mostra a tela de login/cadastro; com sessão, o dashboard.
 - O dono é identificado por `donoId`. Apenas ele vê o formulário de convite.
+- **A UI não é a barreira de segurança:** esconder botões é apenas usabilidade.
+  O backend revalida dono, membro aceito, destinatário do convite e autoria em
+  toda operação.
 - Quadros pessoais não exibem convites nem atribuição de responsáveis.
 - O dono aparece em `donoNome`, separado da lista `membros`.
 - Ao mover um card ou trocar o responsável, a UI aplica a mudança de imediato e
@@ -408,7 +428,10 @@ npm run lint
 - O drag-and-drop usa a API nativa de HTML5; em dispositivos touch, use o
   seletor **"Mover para…"** de cada card.
 - Os testes automatizados cobrem as funções de `src/utils/quadro.js`,
-  `src/utils/tema.js` e `src/utils/toasts.js`; não há testes de componentes.
+  `src/utils/tema.js`, `src/utils/toasts.js` e `src/utils/urls.js`; não há testes
+  de componentes nem testes E2E no browser.
+- O token fica em `localStorage` (ver riscos e avaliação de cookies acima).
+- A CSP é aplicada apenas no deploy da Vercel (`vercel.json`), não no `npm run dev`.
 - `npm run dev` depende de um caminho de projeto sem `#` (veja a seção de HMR).
 
 ## Problemas comuns

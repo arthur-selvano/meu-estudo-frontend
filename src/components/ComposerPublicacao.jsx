@@ -27,6 +27,7 @@ import {
   formatarTamanhoArquivo,
   infoTipoPublicacao,
 } from '../utils/publicacoes'
+import { urlHttpSegura } from '../utils/urls'
 
 const ICONES = {
   ESTUDO: MessagesSquare,
@@ -114,6 +115,13 @@ export default function ComposerPublicacao({ usuario, publicando, onPublicar }) 
       return
     }
 
+    const linkSeguro = urlHttpSegura(linkUrl)
+
+    if (mostraLink && linkUrl.trim() && !linkSeguro) {
+      setErro('Informe um link http:// ou https:// válido.')
+      return
+    }
+
     if (tipo === 'DOCUMENTO' && !arquivo) {
       setErro('Selecione o documento que você quer disponibilizar.')
       return
@@ -123,7 +131,7 @@ export default function ComposerPublicacao({ usuario, publicando, onPublicar }) 
       tipo,
       titulo: tipo === 'ESTUDO' ? '' : titulo,
       conteudo,
-      linkUrl: mostraLink ? linkUrl : '',
+      linkUrl: mostraLink ? (linkSeguro ?? '') : '',
       arquivo: mostraArquivo ? arquivo : null,
     })
 

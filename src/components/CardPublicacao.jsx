@@ -22,6 +22,7 @@ import {
   LIMITE_COMENTARIO,
   infoTipoPublicacao,
 } from '../utils/publicacoes'
+import { urlHttpSegura } from '../utils/urls'
 
 function BotaoAutor({ nome, autorId, onVerPerfil, className = '' }) {
   return (
@@ -54,6 +55,9 @@ export default function CardPublicacao({
   const anexoUrl = publicacao.arquivoUrl
     ? `${API_ORIGIN}${publicacao.arquivoUrl}`
     : null
+  // Defesa em profundidade: o backend já valida, mas o browser nunca recebe
+  // um href javascript:/data: mesmo que o dado tenha sido gravado antes da correção.
+  const linkSeguro = urlHttpSegura(publicacao.linkUrl)
 
   async function handleComentar(event) {
     event.preventDefault()
@@ -115,15 +119,15 @@ export default function CardPublicacao({
           {publicacao.conteudo}
         </p>
 
-        {publicacao.linkUrl && (
+        {linkSeguro && (
           <a
-            href={publicacao.linkUrl}
+            href={linkSeguro}
             target="_blank"
             rel="noreferrer noopener"
             className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-line-soft bg-surface-muted px-3 py-2 text-xs font-medium text-link transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-brand/25"
           >
             <ExternalLink aria-hidden="true" size={14} className="shrink-0" />
-            <span className="truncate">{publicacao.linkUrl}</span>
+            <span className="truncate">{linkSeguro}</span>
           </a>
         )}
 
