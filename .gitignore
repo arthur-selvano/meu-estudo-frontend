@@ -37,6 +37,11 @@ coverage/
 *.njsproj
 *.sln
 
+<<<<<<< Updated upstream
 # Local process docs and scratch
 docs/
+=======
+# Ferramentas locais de desenvolvimento (não versionar)
+.claude/
+>>>>>>> Stashed changes
 .superpowers/
