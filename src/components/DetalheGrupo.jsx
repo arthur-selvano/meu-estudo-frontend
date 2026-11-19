@@ -231,7 +231,7 @@ export default function DetalheGrupo({
         <section className={`${CARTAO} p-4 sm:p-5`}>
           <h3 className="font-serif text-lg sm:text-xl">Convidar membro</h3>
           <p className="mt-1 text-xs text-ink-muted">
-            A pessoa precisa já ter uma conta no MeuEstudos.
+            A pessoa precisa já ter uma conta no Meu Estudos.
           </p>
 
           <form
@@ -355,11 +355,11 @@ export default function DetalheGrupo({
               <label htmlFor="topico-data" className={ROTULO}>
                 Prazo (opcional)
               </label>
-              <div className="relative">
+              <div className="relative w-full">
                 <CalendarDays
                   aria-hidden="true"
                   size={15}
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint z-10"
                 />
                 <input
                   id="topico-data"
@@ -368,7 +368,7 @@ export default function DetalheGrupo({
                   disabled={criandoTopico}
                   value={dataPrevista}
                   onChange={(event) => setDataPrevista(event.target.value)}
-                  className={`${CAMPO} pl-9`}
+                  className={`${CAMPO_ICONE} block min-w-0 max-w-full text-left`}
                 />
               </div>
             </div>

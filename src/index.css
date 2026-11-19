@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+/* Normaliza o input de data no iOS/Safari: altura, alinhamento e texto. */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 1.25rem;
+  min-height: 2.625rem;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+  line-height: 1.25rem;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  margin: 0;
+  padding: 0;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
