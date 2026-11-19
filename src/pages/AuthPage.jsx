@@ -75,7 +75,7 @@ export default function AuthPage() {
           <span className="flex h-10 w-10 items-center justify-center rounded-full border border-inverse-soft/25">
             <GraduationCap aria-hidden="true" size={20} strokeWidth={1.8} />
           </span>
-          <span className="text-sm font-medium tracking-wide">MeuEstudos</span>
+          <span className="text-sm font-medium tracking-wide">Meu Estudo</span>
         </div>
 
         <div className="relative max-w-md">
@@ -99,7 +99,7 @@ export default function AuthPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary">
               <GraduationCap aria-hidden="true" size={20} strokeWidth={1.8} />
             </span>
-            <span className="font-serif text-xl tracking-tight">MeuEstudos</span>
+            <span className="font-serif text-xl tracking-tight">Meu Estudo</span>
           </div>
 
           <h1 className="font-serif text-3xl tracking-tight sm:text-4xl">

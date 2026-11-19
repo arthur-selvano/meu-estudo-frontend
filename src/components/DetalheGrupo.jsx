@@ -231,7 +231,7 @@ export default function DetalheGrupo({
         <section className={`${CARTAO} p-4 sm:p-5`}>
           <h3 className="font-serif text-lg sm:text-xl">Convidar membro</h3>
           <p className="mt-1 text-xs text-ink-muted">
-            A pessoa precisa já ter uma conta no MeuEstudos.
+            A pessoa precisa já ter uma conta no Meu Estudo.
           </p>
 
           <form
